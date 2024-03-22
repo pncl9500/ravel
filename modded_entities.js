@@ -451,6 +451,7 @@ class RadioactiveProjectile extends Entity {
     this.maxLifetime = 1500;
     this.lightCount=this.radius*32+40;
     this.isLight = true;
+    this.weak = true;
   }
   behavior(time, area, offset, players){
     this.clock += time;
