@@ -346,7 +346,7 @@ enemyTest = {
           width: 1024,
           height: 480,
           spawner: [
-            { radius: 32, speed: 4, count: 6, types: ["airburst"] },
+            { radius: 32, speed: 4, count: 2, types: ["airburst"] },
           ],
         },
         {
