@@ -88,6 +88,8 @@ window.onload = function() {
       break;
       case"Legacy Hat":hat.src = "texture/legacy-hat.png";
       break;
+      case"Sloom Removel":hat.src = "texture/sloom-removel.png";
+      break;
     }
     localStorage.sandbox = settings.sandbox = sandbox.checked;
     localStorage.outline = settings.outline = outline.checked;
