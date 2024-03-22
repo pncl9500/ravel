@@ -375,6 +375,22 @@ class World {
           if(object.type == "repelling"){
             object.repulsion = values.repulsion;
           }
+          if(object.type == "param_test"){
+            object.test_param = values.test_param;
+          }
+
+          if(object.type == "rotor"){
+            object.rotor_branch_count = values.rotor_branch_count;
+            object.rotor_node_count = values.rotor_node_count;
+            object.rotor_node_radius = values.rotor_node_radius;
+            object.rotor_rot_speed = values.rotor_rot_speed;
+            object.rotor_reversed = values.rotor_reversed;
+            object.rotor_branch_offset = values.rotor_branch_offset;
+            object.rotor_node_dist = values.rotor_node_dist;
+            object.rotor_branch_dist = values.rotor_branch_dist;
+            object.rotor_offset_per_layer = values.rotor_offset_per_layer;
+            object.rotor_layer_reverse_interval = values.rotor_layer_reverse_interval;
+          }
 
           if(object.type == "frost_giant"){
             object.angle = values.angle;
@@ -846,7 +862,7 @@ class Area {
             enemy = new Oscillating(new Vector(posX, posY), radius / 32, speed, angle)
           }
           if (this.preset[i].type[rand] == "turning") {
-            enemy = new Turning(new Vector(posX, posY), radius / 32, speed, angle)
+            enemy = new Turning(new Vector(posX, posY), radius / 32, speed, angle, this.preset[i].growth_multiplayer)
           }
           if (this.preset[i].type[rand] == "liquid") {
             enemy = new Liquid(new Vector(posX, posY), radius / 32, speed, angle)
@@ -1058,6 +1074,51 @@ class Area {
           if (this.preset[i].type[rand] == "stalactite") {
             enemy = new Stalactite(new Vector(posX, posY), radius / 32, speed, angle)
           }
+          if (this.preset[i].type[rand] == "slooming") {
+            enemy = new Slooming(new Vector(posX, posY), radius / 32, speed, angle)
+          }
+          if (this.preset[i].type[rand] == "riptide") {
+            enemy = new Riptide(new Vector(posX, posY), radius / 32, speed, angle, auraRadius)
+          }
+          if (this.preset[i].type[rand] == "water_trail") {
+            enemy = new Water_Trail(new Vector(posX, posY), radius / 32, speed, angle)
+          }
+          if (this.preset[i].type[rand] == "nightshade") {
+            enemy = new Nightshade(new Vector(posX, posY), radius / 32, speed, angle)
+          }
+          if (this.preset[i].type[rand] == "particulate") {
+            enemy = new Particulate(new Vector(posX, posY), radius / 32, speed, angle)
+          }
+          if (this.preset[i].type[rand] == "cloud") {
+            enemy = new Cloud(new Vector(posX, posY), radius / 32, speed, angle)
+          }
+          if (this.preset[i].type[rand] == "rain") {
+            enemy = new Rain(new Vector(posX, posY), radius / 32, speed, angle)
+          }
+          if (this.preset[i].type[rand] == "storm") {
+            enemy = new Storm(new Vector(posX, posY), radius / 32, speed, angle)
+          }
+          if (this.preset[i].type[rand] == "airburst") {
+            enemy = new Airburst(new Vector(posX, posY), radius / 32, speed, angle)
+          }
+          if (this.preset[i].type[rand] == "param_test") {
+            enemy = new Param_test(new Vector(posX, posY), radius / 32, speed, angle, this.preset[i].test_param)
+          }
+          if (this.preset[i].type[rand] == "rotor") {
+            enemy = new Rotor(new Vector(posX, posY), radius / 32, speed, angle, this.preset[i].rotor_branch_count,
+            this.preset[i].rotor_node_count,
+            this.preset[i].rotor_node_radius,
+            this.preset[i].rotor_rot_speed,
+            this.preset[i].rotor_reversed,
+            this.preset[i].rotor_branch_offset,
+            this.preset[i].rotor_node_dist,
+            this.preset[i].rotor_branch_dist,
+            this.preset[i].rotor_offset_per_layer,
+            this.preset[i].rotor_layer_reverse_interval);
+          }
+          if (this.preset[i].type[rand] == "radioactive_sniper") {
+            enemy = new RadioactiveSniper(new Vector(posX, posY), radius / 32, speed, angle)
+          }
           enemy.isSpawned = true;
           this.entities[this.preset[i].type].push(enemy)
         }
@@ -1193,6 +1254,20 @@ class Area {
         }
         var bullet = new StalactiteProjectile(new Vector(pos.x,pos.y), radius);
         this.entities["stalactite_projectile"].push(bullet);
+        break;
+      case 16:
+        if (!this.entities["airburst_projectile"]) {
+          this.entities["airburst_projectile"] = [];
+        }
+        var bullet = new AirburstBullet(new Vector(pos.x,pos.y), angle, radius, speed);
+        this.entities["airburst_projectile"].push(bullet);
+        break;
+      case 17:
+        if (!this.entities["radioactive_projectile"]) {
+          this.entities["radioactive_projectile"] = [];
+        }
+        var bullet = new RadioactiveProjectile(new Vector(pos.x,pos.y), angle, radius, speed);
+        this.entities["radioactive_projectile"].push(bullet);
         break;
     }
   }

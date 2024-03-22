@@ -42,6 +42,10 @@ function loadMain() {
   game.worlds[20] = new World(new Vector(2898.375, 1400), 20, magnetic_monopole_hard);
 }
 
+function loadTest(){
+  game.worlds[0] = new World(new Vector(0, 0), 0, enemyTest);
+}
+
 function loadHard(){
   game.worlds[0] = new World(new Vector(0, 0), 0, centralCoreFast)
   game.worlds[1] = new World(new Vector(-61, 1440), 1, assorted_alcoveHard);
@@ -151,7 +155,7 @@ function animate(time) {
       context.closePath();
     }
     var world = document.getElementById("world");
-    if(world.selectedIndex == 3 && !loaded) game.worlds[game.players[0].world].areas[game.players[0].area].text = "this is to import a map, top left in the menu";
+    if(world.selectedIndex == 4 && !loaded) game.worlds[game.players[0].world].areas[game.players[0].area].text = "this is to import a map, top left in the menu";
     if(game.worlds[game.players[0].world].areas[game.players[0].area].text){
       const text = game.worlds[game.players[0].world].areas[game.players[0].area].text;
       context.beginPath();

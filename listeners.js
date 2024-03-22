@@ -104,12 +104,15 @@ window.onload = function() {
     var world = document.getElementById("world");
     var hero = document.getElementById("hero");
     if (world.selectedIndex == 0) {
-      loadMain();
+      loadTest();
     }
     if (world.selectedIndex == 1) {
-      loadHard()
+      loadMain();
     }
     if (world.selectedIndex == 2) {
+      loadHard()
+    }
+    if (world.selectedIndex == 3) {
       loadSecondary()
     }
 
@@ -229,7 +232,7 @@ function handleFiles() {
       game = new Game()
       var world = new World(new Vector(0, 0), 0, jsyaml.load(evt.target.result));
       game.worlds[0] = world
-      document.getElementById("world").selectedIndex = 3
+      document.getElementById("world").selectedIndex = 4;
     }
   };
   reader.readAsBinaryString(fileList);

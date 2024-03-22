@@ -4,6 +4,10 @@ const hexToRgb = hex =>
     .substring(1).match(/.{2}/g)
     .map(x => parseInt(x, 16))
 
+function rgbToHex(r, g, b) {
+  return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
+}
+
 let canv;
 
 function renderArea(area, players, focus, old) {
@@ -183,6 +187,9 @@ function renderArea(area, players, focus, old) {
     const timerClear = "Timer-clear: "+settings.timerClear+" (P), (O)";
     context.fillText(timerClear, 0, 95+offset);
     context.strokeText(timerClear, 0, 95+offset);
+    const debval = "DebugVal: "+debugVal;
+    context.fillText(debval, 0, 110+offset);
+    context.strokeText(debval, 0, 110+offset);
   }
   context.fill();
   context.stroke();
@@ -400,6 +407,7 @@ function renderPlayers(area, players, focus) {
     context.lineWidth = 1;
     if(!settings.cooldown)context.strokeStyle = "rgb(211, 211, 0)";
     else if(player.sweetToothConsumed)context.strokeStyle = "rgb(212, 0, 100)";
+    else if(player.regenDisableTimer > 0)context.strokeStyle = "rgb(0, 120, 0)";
     if(!player.reaperShade)context.strokeRect(width / 2 + (player.pos.x - focus.x) * fov - 18 / 32 * fov, height / 2 + (player.pos.y - focus.y) * fov - player.radius * fov - 8 / 32 * fov, 36 / 32 * fov, 7 / 32 * fov);
     context.closePath();
     context.beginPath();

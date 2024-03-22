@@ -136,6 +136,7 @@ class Player {
     this.radiusMultiplier = 1;
     this.radiusAdditioner = 0;
     this.regenAdditioner = 0;
+    this.regenDisableTimer = 0;
     this.addX=0;
     this.addY=0;
     this.dirX=0;
@@ -166,6 +167,11 @@ class Player {
     this.slippery = false;
     this.disabling = false;
     this.prevSlippery = false;
+    this.riptide = false;
+    this.riptideLastDirX = 0;
+    this.riptideLastDirY = 0;
+    this.cloud = false;
+    this.storm = false;
     this.dyingPos = new Vector(0, 0);
     this.level = 1;
     this.points = (settings.no_points)? 0 : 150;
@@ -432,6 +438,7 @@ class Player {
   update(time, friction, magnet) {
     this.update_knockback(time);
     const timeFix = time / (1000 / 30);
+    this.regenDisableTimer -= time;
     this.inBarrier = false;
 
     if(this.flashlight_active || this.lantern_active){
@@ -479,6 +486,17 @@ class Player {
         }
       }
       this.speedMultiplier = 1;
+      if (this.riptide){
+        //replace 10 with riptide pull strength instead of it being a magic number if you actually want to use riptide enemies
+        if (!(this.riptideLastDirY === 0 && this.riptideLastDirX === 0)){
+          this.pos.x += Math.cos(Math.atan2(this.riptideLastDirY, this.riptideLastDirX)) * 0.2 * timeFix;
+          this.pos.y += Math.sin(Math.atan2(this.riptideLastDirY, this.riptideLastDirX)) * 0.2 * timeFix;  
+        }
+        if (!(this.dirX === 0 && this.dirY === 0)){
+          this.riptideLastDirX = this.dirX;
+          this.riptideLastDirY = this.dirY;
+        }
+      }
       if(this.collides&&this.slippery){
         this.d_x*=2;
         this.d_y*=2;
@@ -675,7 +693,9 @@ class Player {
       this.aura = false;
       this.sugar_rush = false;
     }
-    this.energy += (this.regen+this.regenAdditioner) * time / 1000;
+    if (this.regenDisableTimer < 0){
+      this.energy += (this.regen+this.regenAdditioner) * time / 1000;
+    }
     if (this.energy > this.maxEnergy) {
       this.energy = this.maxEnergy;
     }
@@ -741,10 +761,29 @@ class Player {
     this.charging = false;
     this.burning = false;
     this.slippery = false;
-    this.firstAbilityCooldown -= time;
-    this.secondAbilityCooldown -= time;
-    this.firstAbilityCooldown += (Math.abs(this.firstAbilityCooldown) - this.firstAbilityCooldown) / 2;
-    this.secondAbilityCooldown += (Math.abs(this.secondAbilityCooldown) - this.secondAbilityCooldown) / 2;
+    if (this.riptide === false){
+      this.riptideLastDirX = 0;
+      this.riptideLastDirY = 0;
+    }
+    this.riptide = false;
+    if (!this.cloud && !this.storm){
+      this.firstAbilityCooldown -= time;
+      this.secondAbilityCooldown -= time;
+      this.firstAbilityCooldown += (Math.abs(this.firstAbilityCooldown) - this.firstAbilityCooldown) / 2;
+      this.secondAbilityCooldown += (Math.abs(this.secondAbilityCooldown) - this.secondAbilityCooldown) / 2;
+    }
+    if (this.storm){
+      this.firstAbilityCooldown += time;
+      this.secondAbilityCooldown += time;
+      this.firstAbilityCooldown -= (Math.abs(this.firstAbilityCooldown) - this.firstAbilityCooldown) / 2;
+      this.secondAbilityCooldown -= (Math.abs(this.secondAbilityCooldown) - this.secondAbilityCooldown) / 2;
+      if (this.firstAbilityCooldown > this.firstTotalCooldown){
+        this.firstAbilityCooldown = this.firstTotalCooldown;
+      }
+      if (this.secondAbilityCooldown > this.secondTotalCooldown){
+        this.secondAbilityCooldown = this.secondTotalCooldown;
+      }
+    }
     if (!settings.cooldown) {
       this.energy = this.maxEnergy;
       this.firstAbilityCooldown = 0;
@@ -754,6 +793,8 @@ class Player {
     }
     this.tempColor=this.color;
     this.disabling = false;
+    this.cloud = false;
+    this.storm = false;
     var vel;
     var magneticSpeed = (this.vertSpeed == -1) ? 10 : this.vertSpeed;
     var yaxis = (this.vel.y>=0)?1:-1;
@@ -1814,6 +1855,8 @@ class Enemy extends Entity {
     this.imune = false;
     this.isEnemy = true;
     this.self_destruction = false;
+    this.inStorm = false;
+    this.stormAffectedRadiusMultiplier = 1;
   }
   update(time) {
     if(this.color == "#7e7cd6"){if(time>averageFPS*2||isNaN(averageFPS)||!isActive){return}}
@@ -1825,6 +1868,12 @@ class Enemy extends Entity {
     if(this.healing > 0){
       this.healing -= time;
     }
+    if (this.inStorm){
+      this.stormAffectedRadiusMultiplier += (3 - this.stormAffectedRadiusMultiplier) * 0.03;
+    } else {
+      this.stormAffectedRadiusMultiplier += (1 - this.stormAffectedRadiusMultiplier) * 0.03;
+    }
+    this.radiusMultiplier *= this.stormAffectedRadiusMultiplier;
     if(this.minimized > 0){
       this.radiusMultiplier*=0.5;
       this.minimized -= time;
@@ -1859,6 +1908,7 @@ class Enemy extends Entity {
     this.vel.y *= dim;
     this.decayed = false;
     this.repelled = false;
+    this.inStorm = false;
     this.shatterTime -= time;
     if (this.shatterTime < 0) {
       this.shatterTime = 0;
@@ -2185,14 +2235,16 @@ class Oscillating extends Enemy {
   }
 }
 class Turning extends Enemy {
-  constructor(pos, radius, speed, angle) {
+  constructor(pos, radius, speed, angle, circle_size) {
     super(pos, entityTypes.indexOf("turning") - 1, radius, speed, angle, "#336600");
     this.dir = speed / 150;
     this.turning = true;
+    this.circle_size = circle_size;
   }
   behavior(time, area, offset, players) {
     this.velToAngle();
     this.angle += this.dir * (time / 30);
+    console.log(this.circle_Size);
     this.angleToVel();
   }
 }
@@ -3322,6 +3374,8 @@ class Trail extends Enemy {
     }
   }
 }
+
+
 
 class Tree extends Enemy {
   constructor(pos, radius, speed, angle) {

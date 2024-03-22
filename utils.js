@@ -74,7 +74,26 @@ var entityTypes = [
   "cobweb",
   "defender",
   "burning",
-  "sticky_sniper"
+  "sticky_sniper",
+
+  // Testing enemies, also not in evades
+  "slooming", //done
+  "particulate", //done
+  "storm", //done
+  "airburst", //done???? its still very boring
+  "param_test", //done
+  "radioactive_sniper", //done but theres something off about it :(
+
+  "rotor", //done, but more params could be added
+  "nightshade", //done
+  "water_trail", //done
+  "riptide", //mostly done except for the aura size parameter!
+  "cloud", //done
+  "rain", //done
+  "bud",
+  "vine",
+  "sap",
+  "leaflet",
 
   /* Those cannot be spawned by area spawner
   "reverse_projectile",
