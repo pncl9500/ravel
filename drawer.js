@@ -1,3 +1,4 @@
+noUI = false;
 const hexToRgb = hex =>
   hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i
              ,(m, r, g, b) => '#' + r + r + g + g + b + b)
@@ -138,8 +139,10 @@ function renderArea(area, players, focus, old) {
   context.globalCompositeOperation = "destination-in"
   context.drawImage(ligth, 0, 0)
   context.globalCompositeOperation = "source-over"
-  renderUI(area, players, focus)
-  renderMinimap(area, players, focus)
+  if (!noUI){
+    renderUI(area, players, focus)
+    renderMinimap(area, players, focus)
+  }
   context.beginPath();
   context.font = "22px cursive";
   context.fillStyle = "gray";
@@ -150,9 +153,11 @@ function renderArea(area, players, focus, old) {
   const devStat = "Comb Spd: "+ combineSpeed(player) + ", Amount: " + player.safeAmount;
   let offset = 0;
   if(diff == "Easy"){
-    const deathCounter = (settings.dev) ? "Death Count: " + players[0].deathCounter + ", " + devStat : "Death Count: " + players[0].deathCounter; 
-    context.fillText(deathCounter, 0, 20);
-    context.strokeText(deathCounter, 0, 20);
+    if (!noUI){
+      const deathCounter = (settings.dev) ? "Death Count: " + players[0].deathCounter + ", " + devStat : "Death Count: " + players[0].deathCounter; 
+      context.fillText(deathCounter, 0, 20);
+      context.strokeText(deathCounter, 0, 20);
+    }
   } else if (diff == "Medium"){
     const lives = (settings.dev) ? "Lives: " + players[0].lives + ", " + devStat : "Lives: " + players[0].lives;
     let liveColor;
@@ -166,10 +171,12 @@ function renderArea(area, players, focus, old) {
       case 0: liveColor = "red"
       break;
     }
-    context.fillStyle = liveColor;
-    context.strokeStyle = liveColor;//'black';  
-    context.fillText(lives, 0, 20);
-    context.strokeText(lives, 0, 20);
+    if (!noUI){
+      context.fillStyle = liveColor;
+      context.strokeStyle = liveColor;//'black';  
+      context.fillText(lives, 0, 20);
+      context.strokeText(lives, 0, 20);
+    }
   } else if (settings.dev) {
     const text = devStat;
     context.fillText(text, 0, 20);
@@ -196,17 +203,19 @@ function renderArea(area, players, focus, old) {
   context.closePath();
   let scalingWidth = width / 1280;
   let scalingHeight = height / 720;
-  if (players[0].hasCheated) {
-    context.beginPath();
-    context.fillStyle = "purple"
-    context.fillRect(370, height-12*scalingHeight, 12*scalingWidth, 12*scalingHeight);
-    context.closePath();
-  }
-  if (settings.sandbox) {
-    context.beginPath();
-    context.fillStyle = "black"
-    context.fillRect(370, height-24*scalingHeight, 12*scalingWidth, 12*scalingHeight);
-    context.closePath();
+  if (!noUI){
+    if (players[0].hasCheated) {
+      context.beginPath();
+      context.fillStyle = "purple"
+      context.fillRect(370, height-12*scalingHeight, 12*scalingWidth, 12*scalingHeight);
+      context.closePath();
+    }
+    if (settings.sandbox) {
+      context.beginPath();
+      context.fillStyle = "black"
+      context.fillRect(370, height-24*scalingHeight, 12*scalingWidth, 12*scalingHeight);
+      context.closePath();
+    }
   }
   context.beginPath();
   context.fillStyle = "black"

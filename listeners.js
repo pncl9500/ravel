@@ -195,7 +195,9 @@ function keydown(e) {
     player.hasCheated = true;
     settings.cooldown = !settings.cooldown;
   }},Delay)
-  
+  if (e.keyCode == 72){
+    noUI = !noUI;
+  }
 }
 
 function keyup(e) {
