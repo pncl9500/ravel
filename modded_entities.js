@@ -354,6 +354,7 @@ class Param_test extends Enemy {
   }
 }
 
+//1 rot speed = 15 degrees per second
 class Rotor extends Enemy {
   constructor(pos, radius, speed, angle, rotor_branch_count = 2,rotor_node_count = 2,rotor_node_radius = 16,rotor_rot_speed = 5,rotor_reversed = false,rotor_branch_offset = 0, rotor_node_dist = 0, rotor_branch_dist = 0, rotor_offset_per_layer = 0, rotor_layer_reverse_interval = 0) {
     super(pos, entityTypes.indexOf("generic") - 1, radius, speed, angle, "#43701e");
@@ -377,7 +378,8 @@ class Rotor extends Enemy {
       this.spawnNode(area,this.id);
       this.id++;
     }
-    this.rotation += this.rot_speed * time * (1000 / 30) * (1/1000) * this.reverse;
+    console.log(time);
+    this.rotation += this.reverse * (time / 60 / (1000 / 60)) * this.rot_speed * 15;
   }
   spawnNode(area, id){
     const rotor_node = new RotorNode(id, this);
