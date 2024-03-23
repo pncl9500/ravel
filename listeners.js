@@ -106,16 +106,16 @@ window.onload = function() {
     var world = document.getElementById("world");
     var hero = document.getElementById("hero");
     if (world.selectedIndex == 0) {
-      loadTest();
-    }
-    if (world.selectedIndex == 1) {
       loadMain();
     }
-    if (world.selectedIndex == 2) {
+    if (world.selectedIndex == 1) {
       loadHard()
     }
-    if (world.selectedIndex == 3) {
+    if (world.selectedIndex == 2) {
       loadSecondary()
+    }
+    if (world.selectedIndex == 3) {
+      loadTest();
     }
 
     if(settings.sandbox)Delay = 0;
