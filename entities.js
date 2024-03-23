@@ -1400,7 +1400,7 @@ class Aurora extends Player {
         for (var i in area.entities) {
           for (var j in area.entities[i]) {
             var entity = area.entities[i][j];
-            if (distance(entity.pos, new Vector(this.pos.x - offset.x, this.pos.y - offset.y)) < (230 / 32) + entity.radius) {
+            if (distance(entity.pos, new Vector(this.pos.x - offset.x, this.pos.y - offset.y)) < (300 / 32) + entity.radius) {
               if (!area.entities[i][j].imune) {
                 area.entities[i][j].speedMultiplier *= 0.45;
               }

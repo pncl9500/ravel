@@ -328,7 +328,7 @@ function renderPlayers(area, players, focus) {
       } else if(player.auraType == 2){
         context.beginPath();
         context.fillStyle = "rgba(255, 0, 0, 0.2)";
-        context.arc(width / 2 + (player.pos.x - focus.x) * fov, height / 2 + (player.pos.y - focus.y) * fov, 230/32 * fov, 0, Math.PI * 2, true);
+        context.arc(width / 2 + (player.pos.x - focus.x) * fov, height / 2 + (player.pos.y - focus.y) * fov, 300/32 * fov, 0, Math.PI * 2, true);
         context.fill();
         context.closePath();
       } else if(player.auraType == 3){
