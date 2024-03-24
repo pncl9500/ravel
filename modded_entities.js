@@ -506,7 +506,7 @@ class VineProjectile extends Entity{
     this.isEnemy = true;
     this.imune = false;
     this.off = new Vector(0,0);
-    this.detectionRadius = 250/32;
+    this.detectionRadius = 250/32 + parent.radius;
     this.playerDetected = false;
     this.targetOff = new Vector(0,0);
     this.extendingPullStrength = 0.03;
