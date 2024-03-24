@@ -91,6 +91,7 @@ var entityTypes = [
   "cloud", //done
   "rain", //done
   "vine",
+  "swamp",
   "sap",
   "leaflet",
 

@@ -1125,6 +1125,9 @@ class Area {
           if (this.preset[i].type[rand] == "disc") {
             enemy = new Disc(new Vector(posX, posY), radius / 32, speed, angle)
           }
+          if (this.preset[i].type[rand] == "swamp") {
+            enemy = new Swamp(new Vector(posX, posY), radius / 32, speed, angle, auraRadius)
+          }
           enemy.isSpawned = true;
           this.entities[this.preset[i].type].push(enemy)
         }

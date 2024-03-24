@@ -125182,6 +125182,47 @@ enemyTest = {
         },
       ],
     },
+    {
+      name: "Swamp",
+      x: "last_right",
+      y: 0,
+      zones: [
+        {
+          type: "exit",
+          x: 0,
+          y: 0,
+          translate: { x: -160, y: 0 },
+          width: 64,
+          height: 480,
+        },
+        { type: "safe", x: 64, y: 0, width: 256, height: 480 },
+        {
+          type: "active",
+          x: "last_right",
+          y: 0,
+          width: 1024,
+          height: 480,
+          spawner: [
+            { count: 8, radius: 10, speed: 2, types: ["swamp"] },
+          ],
+        },
+        {
+          type: "safe",
+          x: "last_right",
+          y: 0,
+          width: 256,
+          height: "last_height",
+        },
+        {
+          type: "exit",
+          x: "last_right",
+          y: 0,
+          translate: { x: 160, y: 0 },
+          width: 64,
+          height: "last_height",
+        },
+      ],
+    },
   ],
 };
 
@@ -125213,10 +125254,9 @@ stellarSquare = {
           width: 960,
           height: 960,
           spawner: [
-            { count: 16, radius: 10, speed: 7, types: ["disc"] },
-            { count: 8, radius: 16, speed: 6, types: ["disc"] },
-            { count: 4, radius: 32, speed: 5, types: ["disc"] },
-            { count: 2, radius: 64, speed: 4, types: ["disc"] },
+            { count: 4, radius: 8, speed: 2, types: ["swamp"], swamp_radius: 40},
+            { count: 4, radius: 8, speed: 2, types: ["swamp"], swamp_radius: 80},
+            { count: 4, radius: 8, speed: 2, types: ["swamp"], swamp_radius: 120},
           ],
         },
       ],

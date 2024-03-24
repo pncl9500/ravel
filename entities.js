@@ -173,6 +173,8 @@ class Player {
     this.riptideLastDirY = 0;
     this.cloud = false;
     this.storm = false;
+    this.swamp = true;
+    this.swampDebuff = 0;
     this.dyingPos = new Vector(0, 0);
     this.level = 1;
     this.points = (settings.no_points)? 0 : 150;
@@ -315,6 +317,7 @@ class Player {
         if (this.slowing) {
           this.speedMultiplier *= (1-this.effectImmune*(1-0.7))*this.effectReplayer;
         }
+        this.speedMultiplier *= (1 - this.swampDebuff) * this.effectReplayer;
         if (this.freezing) {
           this.speedMultiplier *= (1-this.effectImmune*(1-0.2))*this.effectReplayer;
         }
@@ -528,6 +531,9 @@ class Player {
       if (this.freezing) {
         this.speedMultiplier *= (1-this.effectImmune*(1-0.2))*this.effectReplayer;
       }
+      this.swampDebuff += (this.swamp && !this.isDead && this.effectImmune !== 0) ? 0.007 * timeFix * this.effectImmune : -0.01 * timeFix;
+      this.swampDebuff = clamp(this.swampDebuff, 0, 1)
+      debugVal = this.swampDebuff
       if (this.web || this.cobweb) {
         if(this.webstickness <= 0){
           this.webstickness = 0.1;
@@ -767,6 +773,7 @@ class Player {
       this.riptideLastDirY = 0;
     }
     this.riptide = false;
+    this.swamp = false;
     if (!this.cloud && !this.storm){
       this.firstAbilityCooldown -= time;
       this.secondAbilityCooldown -= time;

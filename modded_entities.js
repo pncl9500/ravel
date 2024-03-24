@@ -541,3 +541,14 @@ class Disc extends Enemy {
     this.renderedAsRing = true;
   }
 }
+
+class Swamp extends Enemy {
+  constructor(pos, radius, speed, angle, auraRadius = 150) {
+    super(pos, entityTypes.indexOf("swamp") - 1, radius, speed, angle, "#0b360b", true, "rgba(11, 54, 11, 0.25)", auraRadius / 32);
+  }
+  auraEffect(player, worldPos) {
+    if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.auraSize) {
+      player.swamp = true;
+    }
+  }
+}
