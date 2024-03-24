@@ -2244,7 +2244,6 @@ class Turning extends Enemy {
   behavior(time, area, offset, players) {
     this.velToAngle();
     this.angle += this.dir * (time / 30);
-    console.log(this.circle_Size);
     this.angleToVel();
   }
 }

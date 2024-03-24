@@ -90,7 +90,6 @@ var entityTypes = [
   "riptide", //mostly done except for the aura size parameter!
   "cloud", //done
   "rain", //done
-  "bud",
   "vine",
   "sap",
   "leaflet",

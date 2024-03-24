@@ -8,7 +8,9 @@ class Generic extends Enemy {
   }
 }
 
-//slooming enemy behaves strangely when tabbing out and tabbing back in.
+//slooming enemy behaves strangely when tabbing out and tabbing back in and doesn't change size when hit by player bullets properly
+//this is because im a dumbass and didn't use radius multiplied and set the fixedradius
+//it was my first enemy type added cut me some slack
 class Slooming extends Enemy {
   constructor(pos, radius, speed, angle) {
     super(pos, entityTypes.indexOf("slooming") - 1, radius, speed, angle, "#8d78bf");
@@ -378,7 +380,6 @@ class Rotor extends Enemy {
       this.spawnNode(area,this.id);
       this.id++;
     }
-    console.log(time);
     this.rotation += this.reverse * (time / 60 / (1000 / 60)) * this.rot_speed * 15;
   }
   spawnNode(area, id){
@@ -398,7 +399,6 @@ class RotorNode extends Entity {
     this.layer_in_branch = Math.floor(id / parent.branch_count);
     this.position_in_branch = id % parent.branch_count;
     this.angle_btwn_branches = 360 / parent.branch_count;
-    console.log(parent.layer_reverse_interval);
     this.dist_from_center = this.layer_in_branch * (parent.node_radius / 8 / 2) + this.radius + parent.radius + parent.branch_dist + parent.node_dist * this.layer_in_branch;
     this.no_collide = true;
     this.outline = true;
@@ -474,5 +474,59 @@ class RadioactiveProjectile extends Entity {
       this.vel.y = Math.sin(0) * this.speed;
       this.toRemove = true;
     }
+  }
+}
+
+class Vine extends Enemy {
+  constructor(pos, radius, speed, angle) {
+    super(pos, entityTypes.indexOf("vine") - 1, radius, speed, angle, "#5fa372");
+    this.Harmless = true;    
+    this.imune = true;
+    this.spawnedProj = false;
+  }
+  behavior(time, area, offset, players){
+    if (!this.spawnedProj){
+      this.spawnedProj = true;
+      this.spawnProjectile(area, offset);
+    }
+  }
+  spawnProjectile(area, offset){
+    const vine_projectile = new VineProjectile(this,this.radius);
+    if(!area.entities["vine_projectile"]){area.entities["vine_projectile"] = []}
+    area.entities["vine_projectile"].push(vine_projectile);
+  }
+}
+
+class VineProjectile extends Entity{
+  constructor(parent, radius) {
+    super(parent.pos, radius, "#5fa372");
+    this.parent = parent;
+    this.outline = true;
+    this.renderFirst = false;
+    this.isEnemy = true;
+    this.off = new Vector(0,0);
+    this.detectionRadius = 250/32;
+    this.playerDetected = false;
+    this.targetOff = new Vector(0,0);
+    this.extendingPullStrength = 0.03;
+    this.recedingPullStrength = 0.08;
+    this.pullStrength = 1;
+  }
+  behavior(time, area, offset, players){
+    const timeFix = time / (1000 / 30);
+    this.pos.x = this.parent.pos.x + this.off.x;
+    this.pos.y = this.parent.pos.y + this.off.y;
+    if (distance(players[0].pos, new Vector(this.parent.pos.x + offset.x, this.parent.pos.y + offset.y)) < players[0].radius + this.detectionRadius && !players[0].safeZone && !players[0].night) {
+      this.targetOff = new Vector((this.parent.pos.x + offset.x - players[0].pos.x) * -1,(this.parent.pos.y + offset.y - players[0].pos.y) * -1);
+      this.pullStrength = this.extendingPullStrength;
+    } else {
+      this.targetOff = new Vector(0,0);
+      this.pullStrength = this.recedingPullStrength;
+    }
+    this.off.x += (this.targetOff.x - this.off.x) * this.pullStrength * timeFix;
+    this.off.y += (this.targetOff.y - this.off.y) * this.pullStrength * timeFix;
+  }
+  interact(player, worldPos) {
+    interactionWithEnemy(player,this,worldPos,true,this.corrosive,this.imune,false,true)
   }
 }
