@@ -532,3 +532,12 @@ class VineProjectile extends Entity{
     interactionWithEnemy(player,this,worldPos,true,this.corrosive,this.imune,false,true)
   }
 }
+
+class Disc extends Enemy {
+  constructor(pos, radius, speed, angle) {
+    super(pos, entityTypes.indexOf("disc") - 1, radius, speed, angle, "#222873");
+    this.imune = true;
+    this.corrosive = true;
+    this.renderedAsRing = true;
+  }
+}

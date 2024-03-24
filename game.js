@@ -1122,6 +1122,9 @@ class Area {
           if (this.preset[i].type[rand] == "vine") {
             enemy = new Vine(new Vector(posX, posY), radius / 32, speed, angle)
           }
+          if (this.preset[i].type[rand] == "disc") {
+            enemy = new Disc(new Vector(posX, posY), radius / 32, speed, angle)
+          }
           enemy.isSpawned = true;
           this.entities[this.preset[i].type].push(enemy)
         }

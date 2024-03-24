@@ -9,6 +9,10 @@ function rgbToHex(r, g, b) {
   return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
 }
 
+ringEntityOutlineWidth = 7;
+entityOutlineWidth = 2;
+
+
 let canv;
 
 function renderArea(area, players, focus, old) {
@@ -500,7 +504,8 @@ function renderSecondEntities(area, players, focus) {
         } else {
           context.globalAlpha = 1;
           context.beginPath();
-          context.fillStyle = entities[i][j].color;
+
+          context.fillStyle = entities[i][j].renderedAsRing ? "rgba(0, 0, 0, 0)": entities[i][j].color;
           if ((entities[i][j].Harmless || entities[i][j].healing>0)&&!entities[i][j].texture) {
             context.globalAlpha = 0.4;
           }
@@ -517,10 +522,18 @@ function renderSecondEntities(area, players, focus) {
           if(entities[i][j].healing>0){
             context.fillStyle="rgb(0, 221, 0)";
           }
-          context.lineWidth = 2
-          context.strokeStyle = "black"
+          context.lineWidth = entities[i][j].renderedAsRing ? ringEntityOutlineWidth : entityOutlineWidth;
+          context.strokeStyle = entities[i][j].renderedAsRing ? entities[i][j].color : "black";
+          var correctedRadius = entities[i][j].radius;
+          if (entities[i][j].renderedAsRing){
+            correctedRadius -= ringEntityOutlineWidth / fov / 2;
+            console.log(correctedRadius);
+            if (correctedRadius <= 0){
+              correctedRadius = 0;
+            }
+          }
           if(entities[i][j].radius * fov>0){
-            if(!entities[i][j].texture){context.arc(width / 2 + (area.pos.x + entities[i][j].pos.x - focus.x) * fov, height / 2 + (area.pos.y + entities[i][j].pos.y - focus.y) * fov, entities[i][j].radius * fov, 0, Math.PI * 2, true);}
+            if(!entities[i][j].texture){context.arc(width / 2 + (area.pos.x + entities[i][j].pos.x - focus.x) * fov, height / 2 + (area.pos.y + entities[i][j].pos.y - focus.y) * fov, correctedRadius * fov, 0, Math.PI * 2, true);}
             else{
               var Texture;
               switch(entities[i][j].texture){
@@ -531,7 +544,7 @@ function renderSecondEntities(area, players, focus) {
               }
               if(Texture){
                 context.imageSmoothingEnabled = true;
-                context.drawImage(Texture,width / 2 + (area.pos.x + entities[i][j].pos.x - focus.x-entities[i][j].radius) * fov, height / 2 + (area.pos.y + entities[i][j].pos.y - focus.y-entities[i][j].radius) * fov,entities[i][j].radius * fov*2,entities[i][j].radius * fov*2)
+                context.drawImage(Texture,width / 2 + (area.pos.x + entities[i][j].pos.x - focus.x-correctedRadius) * fov, height / 2 + (area.pos.y + entities[i][j].pos.y - focus.y-correctedRadius) * fov,correctedRadius * fov*2,correctedRadius * fov*2)
                 Texture = 0;
                 context.imageSmoothingEnabled = false;
               }
@@ -550,7 +563,7 @@ function renderSecondEntities(area, players, focus) {
               context.fill();
             }
             if (entities[i][j].outline && settings.outline) {
-              context.lineWidth = 2/(32/fov);
+              context.lineWidth = (context.lineWidth = entities[i][j].renderedAsRing ? ringEntityOutlineWidth : entityOutlineWidth)/(32/fov);
               context.stroke()
             }
             context.globalAlpha = 1;

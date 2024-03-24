@@ -94,6 +94,8 @@ var entityTypes = [
   "sap",
   "leaflet",
 
+  "disc",
+
   /* Those cannot be spawned by area spawner
   "reverse_projectile",
   "minimize_projectile"

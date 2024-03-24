@@ -1,5 +1,6 @@
 class Entity {
   constructor(pos, radius, color) {
+    this.renderedAsRing = false;
     this.pos = pos;
     this.radius = radius;
     this.fixedRadius = radius;
