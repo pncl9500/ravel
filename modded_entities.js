@@ -504,6 +504,7 @@ class VineProjectile extends Entity{
     this.outline = true;
     this.renderFirst = false;
     this.isEnemy = true;
+    this.imune = false;
     this.off = new Vector(0,0);
     this.detectionRadius = 250/32;
     this.playerDetected = false;
@@ -516,7 +517,8 @@ class VineProjectile extends Entity{
     const timeFix = time / (1000 / 30);
     this.pos.x = this.parent.pos.x + this.off.x;
     this.pos.y = this.parent.pos.y + this.off.y;
-    if (distance(players[0].pos, new Vector(this.parent.pos.x + offset.x, this.parent.pos.y + offset.y)) < players[0].radius + this.detectionRadius && !players[0].safeZone && !players[0].night) {
+    console.log(this.freeze);
+    if (distance(players[0].pos, new Vector(this.parent.pos.x + offset.x, this.parent.pos.y + offset.y)) < players[0].radius + this.detectionRadius && !players[0].safeZone && !players[0].night && !players[0].isDead) {
       this.targetOff = new Vector((this.parent.pos.x + offset.x - players[0].pos.x) * -1,(this.parent.pos.y + offset.y - players[0].pos.y) * -1);
       this.pullStrength = this.extendingPullStrength;
     } else {
