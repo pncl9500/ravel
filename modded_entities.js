@@ -535,7 +535,7 @@ class VineProjectile extends Entity{
 
 class Disc extends Enemy {
   constructor(pos, radius, speed, angle) {
-    super(pos, entityTypes.indexOf("disc") - 1, radius, speed, angle, "#222873");
+    super(pos, entityTypes.indexOf("disc") - 1, radius, speed, angle, "#1049a3");
     this.imune = true;
     this.corrosive = true;
     this.renderedAsRing = true;
