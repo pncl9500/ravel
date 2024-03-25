@@ -561,3 +561,56 @@ class Swamp extends Enemy {
     }
   }
 }
+
+class SapSniper extends Enemy {
+  constructor(pos, radius, speed, angle) {
+    super(pos, entityTypes.indexOf("sap_sniper") - 1, radius, speed, angle, "#d6ac42");
+    this.releaseTime = 2000;
+    this.clock = Math.random() * this.releaseTime;
+  }
+  behavior(time, area, offset, players) {
+    this.clock += time;
+    if (this.clock > this.releaseTime) {
+      var min = 18.75;
+      var index;
+      var boundary = area.getActiveBoundary();
+      for (var i in players) {
+        if (distance(this.pos, new Vector(players[i].pos.x - offset.x, players[i].pos.y - offset.y)) < min && pointInRectangle(new Vector(players[i].pos.x - offset.x, players[i].pos.y - offset.y), new Vector(boundary.x, boundary.y), new Vector(boundary.w, boundary.h))) {
+          min = distance(this.pos, new Vector(players[i].pos.x - offset.x, players[i].pos.y - offset.y));
+          index = i;
+        }
+      }
+      if (index != undefined&&!players[0].night&&!players[0].god&&!players[0].isDead) {
+        var dX = (players[index].pos.x - offset.x) - this.pos.x;
+        var dY = (players[index].pos.y - offset.y) - this.pos.y;
+        area.addSniperBullet(18, this.pos, Math.atan2(dY, dX), this.radius / 2, 10)
+        this.clock = 0;
+      }
+    }
+  }
+}
+
+class SapSniperProjectile extends Entity {
+  constructor(pos, angle, radius, speed) {
+    super(pos, radius, "#d6ac42");
+    this.vel.x = Math.cos(angle) * speed;
+    this.vel.y = Math.sin(angle) * speed;
+    this.Harmless = false;
+    this.clock = 0;
+    this.weak = true;
+  }
+  behavior(time, area, offset, players){
+    this.clock += time;
+  }
+  interact(player, worldPos) {
+    if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.radius && !invulnerable(player)) {
+      player.swampDebuff += 0.35;
+      if (player.swampDebuff < 0.8){
+        player.sapTimer = 4000;
+      }
+      this.vel.x = Math.cos(0) * this.speed;
+      this.vel.y = Math.sin(0) * this.speed;
+      this.toRemove = true;
+    }
+  }
+}

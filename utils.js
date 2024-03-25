@@ -96,6 +96,7 @@ var entityTypes = [
   "leaflet",
 
   "disc",
+  "sap_sniper"
 
   /* Those cannot be spawned by area spawner
   "reverse_projectile",

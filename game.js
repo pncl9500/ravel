@@ -1130,6 +1130,9 @@ class Area {
           if (this.preset[i].type[rand] == "swamp") {
             enemy = new Swamp(new Vector(posX, posY), radius / 32, speed, angle, auraRadius)
           }
+          if (this.preset[i].type[rand] == "sap_sniper") {
+            enemy = new SapSniper(new Vector(posX, posY), radius / 32, speed, angle)
+          }
           enemy.isSpawned = true;
           this.entities[this.preset[i].type].push(enemy)
         }
@@ -1279,6 +1282,13 @@ class Area {
         }
         var bullet = new RadioactiveProjectile(new Vector(pos.x,pos.y), angle, radius, speed);
         this.entities["radioactive_projectile"].push(bullet);
+        break;
+      case 18:
+        if (!this.entities["sap_projectile"]) {
+          this.entities["sap_projectile"] = [];
+        }
+        var bullet = new SapSniperProjectile(new Vector(pos.x,pos.y), angle, radius, speed);
+        this.entities["sap_projectile"].push(bullet);
         break;
     }
   }

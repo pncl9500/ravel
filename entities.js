@@ -175,6 +175,7 @@ class Player {
     this.storm = false;
     this.swamp = true;
     this.swampDebuff = 0;
+    this.sapTimer = 0;
     this.dyingPos = new Vector(0, 0);
     this.level = 1;
     this.points = (settings.no_points)? 0 : 150;
@@ -443,6 +444,7 @@ class Player {
     this.update_knockback(time);
     const timeFix = time / (1000 / 30);
     this.regenDisableTimer -= time;
+    this.sapTimer -= time;
     this.inBarrier = false;
 
     if(this.flashlight_active || this.lantern_active){
@@ -531,7 +533,7 @@ class Player {
       if (this.freezing) {
         this.speedMultiplier *= (1-this.effectImmune*(1-0.2))*this.effectReplayer;
       }
-      this.swampDebuff += (this.swamp && !this.isDead && this.effectImmune !== 0) ? 0.007 * timeFix * this.effectImmune : -0.01 * timeFix;
+      this.swampDebuff += (this.swamp && !this.isDead && this.effectImmune !== 0) ? 0.007 * timeFix * this.effectImmune : (this.sapTimer <= 0 ? -0.01 : -0.004) * timeFix;
       this.swampDebuff = clamp(this.swampDebuff, 0, 1)
       debugVal = this.swampDebuff
       if (this.web || this.cobweb) {

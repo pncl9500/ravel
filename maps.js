@@ -125254,8 +125254,7 @@ stellarSquare = {
           width: 960,
           height: 960,
           spawner: [
-            { count: 4, radius: 8, speed: 2, types: ["rotor"]},
-            { count: 4, radius: 8, speed: 2, types: ["rotor"], rotor_corrosive: true},
+            { count: 4, radius: 8, speed: 2, types: ["sap_sniper"]},
           ],
         },
       ],
