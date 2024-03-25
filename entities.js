@@ -1864,6 +1864,7 @@ class Enemy extends Entity {
     this.isEnemy = true;
     this.self_destruction = false;
     this.inStorm = false;
+    this.storm_immune = false;
     this.stormAffectedRadiusMultiplier = 1;
   }
   update(time) {
@@ -1876,7 +1877,7 @@ class Enemy extends Entity {
     if(this.healing > 0){
       this.healing -= time;
     }
-    if (this.inStorm){
+    if (this.inStorm && !this.storm_immune){
       this.stormAffectedRadiusMultiplier += (3 - this.stormAffectedRadiusMultiplier) * 0.03;
     } else {
       this.stormAffectedRadiusMultiplier += (1 - this.stormAffectedRadiusMultiplier) * 0.03;
@@ -1959,6 +1960,7 @@ class Wall extends Enemy {
     this.move_clockwise = !move_clockwise;
     var x,y;
     var radius = radius;
+    this.storm_immune = true;
     var distance = wallIndex * (
       (boundary.w - radius * 2) * 2 +
       (boundary.h - radius * 2) * 2) / count
