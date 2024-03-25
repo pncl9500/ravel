@@ -592,7 +592,7 @@ class SapSniper extends Enemy {
 
 class SapSniperProjectile extends Entity {
   constructor(pos, angle, radius, speed) {
-    super(pos, radius, "#d6ac42");
+    super(pos, radius, "#ad6610");
     this.vel.x = Math.cos(angle) * speed;
     this.vel.y = Math.sin(angle) * speed;
     this.Harmless = false;
