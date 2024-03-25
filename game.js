@@ -390,6 +390,7 @@ class World {
             object.rotor_branch_dist = values.rotor_branch_dist;
             object.rotor_offset_per_layer = values.rotor_offset_per_layer;
             object.rotor_layer_reverse_interval = values.rotor_layer_reverse_interval;
+            object.rotor_corrosive = values.rotor_corrosive;
           }
 
           if(object.type == "frost_giant"){
@@ -1114,7 +1115,8 @@ class Area {
             this.preset[i].rotor_node_dist,
             this.preset[i].rotor_branch_dist,
             this.preset[i].rotor_offset_per_layer,
-            this.preset[i].rotor_layer_reverse_interval);
+            this.preset[i].rotor_layer_reverse_interval,
+            this.preset[i].rotor_corrosive);
           }
           if (this.preset[i].type[rand] == "radioactive_sniper") {
             enemy = new RadioactiveSniper(new Vector(posX, posY), radius / 32, speed, angle)

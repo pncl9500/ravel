@@ -358,7 +358,7 @@ class Param_test extends Enemy {
 
 //1 rot speed = 15 degrees per second
 class Rotor extends Enemy {
-  constructor(pos, radius, speed, angle, rotor_branch_count = 2,rotor_node_count = 2,rotor_node_radius = 16,rotor_rot_speed = 5,rotor_reversed = false,rotor_branch_offset = 0, rotor_node_dist = 0, rotor_branch_dist = 0, rotor_offset_per_layer = 0, rotor_layer_reverse_interval = 0) {
+  constructor(pos, radius, speed, angle, rotor_branch_count = 2,rotor_node_count = 2,rotor_node_radius = 16,rotor_rot_speed = 5,rotor_reversed = false,rotor_branch_offset = 0, rotor_node_dist = 0, rotor_branch_dist = 0, rotor_offset_per_layer = 0, rotor_layer_reverse_interval = 0, rotor_corrosive = false) {
     super(pos, entityTypes.indexOf("generic") - 1, radius, speed, angle, "#43701e");
     this.branch_count = rotor_branch_count;
     this.node_count = rotor_node_count;
@@ -370,6 +370,11 @@ class Rotor extends Enemy {
     this.branch_dist = rotor_branch_dist / 16;
     this.offset_per_layer = rotor_offset_per_layer;
     this.layer_reverse_interval = rotor_layer_reverse_interval;
+    this.corrosive = rotor_corrosive;
+    if (this.corrosive){
+      this.renderedAsRing = true;
+      this.color = "#229111";
+    }
     this.id = 0;
     this.clock = 0;
     this.imune = true;
@@ -395,7 +400,11 @@ class RotorNode extends Entity {
     this.id = id;
     this.parent = parent;
     this.imune = true;
-    this.corrosive = false;
+    this.corrosive = parent.corrosive;
+    if (this.corrosive){
+      this.renderedAsRing = true;
+      this.color = "#229111";
+    }
     this.layer_in_branch = Math.floor(id / parent.branch_count);
     this.position_in_branch = id % parent.branch_count;
     this.angle_btwn_branches = 360 / parent.branch_count;

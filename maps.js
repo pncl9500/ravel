@@ -125254,9 +125254,8 @@ stellarSquare = {
           width: 960,
           height: 960,
           spawner: [
-            { count: 4, radius: 8, speed: 2, types: ["swamp"], swamp_radius: 40},
-            { count: 4, radius: 8, speed: 2, types: ["swamp"], swamp_radius: 80},
-            { count: 4, radius: 8, speed: 2, types: ["swamp"], swamp_radius: 120},
+            { count: 4, radius: 8, speed: 2, types: ["rotor"]},
+            { count: 4, radius: 8, speed: 2, types: ["rotor"], rotor_corrosive: true},
           ],
         },
       ],
