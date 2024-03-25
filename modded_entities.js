@@ -583,7 +583,7 @@ class SapSniper extends Enemy {
       if (index != undefined&&!players[0].night&&!players[0].god&&!players[0].isDead) {
         var dX = (players[index].pos.x - offset.x) - this.pos.x;
         var dY = (players[index].pos.y - offset.y) - this.pos.y;
-        area.addSniperBullet(18, this.pos, Math.atan2(dY, dX), this.radius / 2, 10)
+        area.addSniperBullet(18, this.pos, Math.atan2(dY, dX), this.radius * 0.65, 10)
         this.clock = 0;
       }
     }
