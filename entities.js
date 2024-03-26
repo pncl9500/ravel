@@ -3055,7 +3055,7 @@ class Zigzag extends Enemy {
     this.switchInterval = 500;
     this.switchTime = 500;
     this.switchAdd = false;
-    this.turnAngle = Math.PI / 2
+    this.turnAngle = Math.PI / 2;
   }
   behavior(time, area, offset, players) {
     if (this.switchTime > 0) {
