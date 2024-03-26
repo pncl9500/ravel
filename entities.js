@@ -2656,10 +2656,10 @@ class Teleporting extends Enemy {
   behavior(time, area, offset, players) {
     this.clock += time
     this.speedMultiplier = 0
-    if (this.clock > 1000) {
+    if (this.clock > 800) {
       this.speedMultiplier = 1;
     }
-    this.clock = this.clock % 1000;
+    this.clock = this.clock % 800;
   }
 }
 
