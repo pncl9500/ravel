@@ -18,6 +18,26 @@ var scale = 1;
 var loaded = false;
 var game = new Game();
 
+//separate url into each parameter
+var urlParams = window.location.search.split("?");
+//remove empty first parameter
+urlParams.shift();
+for (var i = 0; i < urlParams.length; i++){
+  //split each parameter into its key and value
+  var pair = urlParams[i].split("=");
+  var param = pair[0];
+  var val = pair[1];
+  //do stuff with each parameter
+  switch (param) {
+    case "world":
+      var world = document.getElementById("world");
+      world.selectedIndex = val;
+      break;
+    default:
+      break;
+  }
+}
+
 function loadMain() {
   game.worlds[0] = new World(new Vector(0, 0), 0, centralCore)
   game.worlds[1] = new World(new Vector(0, 80), 1, hauntedHalls)
