@@ -332,7 +332,7 @@ class Player {
         if(this.sticky || this.stickness>0){
           this.speedMultiplier *= (1-this.effectImmune*(1-0.2))*this.effectReplayer;
         }
-        this.distance_movement = (this.speed*this.speedMultiplier)+this.speedAdditioner;
+        this.distance_movement = (this.speed*this.speedMultiplier)+this.speedAdditioner*(1-this.swampDebuff);
         this.mouseActive = false;
           if (input.isMouse&&!this.cent_is_moving&&!(input.keys[87] || input.keys[38]||input.keys[65] || input.keys[37]||input.keys[83] || input.keys[40]||input.keys[68] || input.keys[39])) {
             this.mouse_distance_full_strenght = 150;
