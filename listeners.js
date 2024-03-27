@@ -117,6 +117,9 @@ window.onload = function() {
     if (world.selectedIndex == 3) {
       loadTest();
     }
+    if (world.selectedIndex == 4) {
+      loadOccluded();
+    }
 
     if(settings.sandbox)Delay = 0;
 
@@ -236,7 +239,7 @@ function handleFiles() {
       game = new Game()
       var world = new World(new Vector(0, 0), 0, jsyaml.load(evt.target.result));
       game.worlds[0] = world
-      document.getElementById("world").selectedIndex = 4;
+      document.getElementById("world").selectedIndex = 5;
     }
   };
   reader.readAsBinaryString(fileList);
