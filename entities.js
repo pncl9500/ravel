@@ -1287,7 +1287,7 @@ class Magmax extends Player {
     super(pos, 6, speed, "#FF0000", "Magmax");
     this.harden = false;
     this.flow = false;
-    this.hasAB = true; this.ab1L = 5; this.ab2L = 5; this.firstTotalCooldown = 0; this.secondTotalCooldown = 500;
+    this.hasAB = true; this.ab1L = 5; this.ab2L = 5; this.firstTotalCooldown = 0; this.secondTotalCooldown = 250;
   }
   abilities(time, area, offset) {
     if (this.firstAbility) {
