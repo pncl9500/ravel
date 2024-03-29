@@ -4354,7 +4354,7 @@ class SeedlingProjectile extends Entity {
     this.outline = true;
     this.renderFirst = false;
     this.imune = true;
-    this.angle = 0//spawner.angle;
+    this.angle = spawner.angle;
     this.angleToVel();
     this.dir = this.speed/30;
     this.seedOffset = new Vector(0,-this.radius*1.5*32);
@@ -4364,14 +4364,16 @@ class SeedlingProjectile extends Entity {
     this.velToAngle();
     this.angle += this.dir * (time / 30);
     this.angleToVel();
-    this.seedOffset.x+=this.vel.x;
-    this.seedOffset.y+=this.vel.y;
+    this.seedOffset.x = this.vel.x * this.radius * 32 / 3;
+    this.seedOffset.y = this.vel.y * this.radius * 32 / 3;
     this.pos = this.newPosition(this.seedOffset.x,this.seedOffset.y)
   }
   interact(player, worldPos) {
     interactionWithEnemy(player,this,worldPos,true,this.corrosive,this.imune,false,true)
   }
   newPosition(x,y){
+    //seedling projectiles lag 1 frame behind the main enemy in vanilla evades, so we need to compensate for this
+    //todo: compensate for this
     return new Vector(this.spawner.pos.x+x/32,this.spawner.pos.y+y/32)
   }
 }
