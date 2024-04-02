@@ -1868,6 +1868,22 @@ class Enemy extends Entity {
     this.inStorm = false;
     this.storm_immune = false;
     this.stormAffectedRadiusMultiplier = 1;
+    this.effects = []
+  }
+  applyEffects(time){
+    for (var i = 0; i < this.effects.length; i++){
+      this.effects[i].apply(time, this);
+      if (this.effects[i].toRemove){
+        this.effects.splice(i, 1);
+        i--;
+      }
+    }
+  }
+  addEffect(eff){
+    this.effects.push(eff);
+    this.effects.sort((a, b) => {
+      a.priority - b.priority;
+    })
   }
   update(time) {
     if(this.color == "#7e7cd6"){if(time>averageFPS*2||isNaN(averageFPS)||!isActive){return}}
@@ -1901,6 +1917,7 @@ class Enemy extends Entity {
     }
     var vel = new Vector(this.vel.x * this.speedMultiplier, this.vel.y * this.speedMultiplier)
     this.speedMultiplier = 1;
+    this.applyEffects(time);
     this.radius *= this.radiusMultiplier;
     this.auraSize = this.auraStaticSize * this.radiusMultiplier;
     this.radiusMultiplier = 1;

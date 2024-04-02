@@ -347,6 +347,12 @@ function renderPlayers(area, players, focus) {
         context.arc(width / 2 + (player.pos.x - focus.x) * fov, height / 2 + (player.pos.y - focus.y) * fov, 190/32 * fov, 0, Math.PI * 2, true);
         context.fill();
         context.closePath();
+      } else if(player.auraType == 5){
+        context.beginPath();
+        context.fillStyle = "rgba(133, 192, 223, 0.25)";
+        context.arc(width / 2 + (player.pos.x - focus.x) * fov, height / 2 + (player.pos.y - focus.y) * fov, 270/32 * fov, 0, Math.PI * 2, true);
+        context.fill();
+        context.closePath();
       }
     }
 

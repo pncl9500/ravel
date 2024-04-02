@@ -747,6 +747,9 @@ function loadImages(character){
     case "Mirage":
       abilityOne.src = "texture/shift.png";
       abilityTwo.src = "texture/obscure.png";
+    case "Minerva":
+      abilityOne.src = "texture/judgement.png";
+      abilityTwo.src = "texture/pardon.png";
   }
 
   if(document.getElementById("wreath").value.includes("Crown")){
