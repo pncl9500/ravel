@@ -62,12 +62,13 @@ class Minerva extends Player {
 class Grom extends Player {
   constructor(pos, speed) {
     super(pos, 0, speed, "#8dcc8f", "Grom");
-    this.hasAB = true; this.ab1L = 0; this.ab2L = 0; this.firstTotalCooldown = 8; this.secondTotalCooldown = 0;
+    this.hasAB = true; this.ab1L = 5; this.ab2L = 0; this.firstTotalCooldown = 8000; this.secondTotalCooldown = 0;
     this.corrodeUses = 0;
   }
   abilities(time, area, offset) {
     if (this.firstAbility && this.firstAbilityCooldown == 0 && this.energy >= 15) {
       this.corrodeUses++;
+      console.log(this.corrodeUses);
       if (this.corrodeUses >= 2){
         this.corrodeUses = 0;
         this.firstAbilityCooldown = this.firstTotalCooldown;
@@ -114,6 +115,7 @@ class CorrodeProjectile extends Enemy {
   behavior(time, area, offset, players) {
     this.clock += time;
     if(this.clock>=800){
+      this.spawnBullet(area,'corrode_projectile_exploded')
       this.toRemove = true;
     }
     for(var i in area.entities){
@@ -198,6 +200,8 @@ class CorrodeEffect extends EnemyEffect{
         this.targetMultipliers[this.targets.indexOf(target)] === -1;
         target.HarmlessEffect = 3000;
         target.Harmless = true;
+        target.auraDisabledEffect = 3000;
+        target.auraDisabled = true;
         return;
       }
       target.speedMultiplier *= this.targetMultipliers[this.targets.indexOf(target)];

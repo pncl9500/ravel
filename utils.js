@@ -750,6 +750,8 @@ function loadImages(character){
     case "Minerva":
       abilityOne.src = "texture/judgement.png";
       abilityTwo.src = "texture/pardon.png";
+    case "Grom":
+      abilityOne.src = "texture/mortar.png";
   }
 
   if(document.getElementById("wreath").value.includes("Crown")){

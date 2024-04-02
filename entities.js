@@ -1909,7 +1909,12 @@ class Enemy extends Entity {
       this.HarmlessEffect -= time;
       this.Harmless = true;
       if(this.HarmlessEffect <= 0)this.Harmless = false;
-    } 
+    }
+    if (this.auraDisabledEffect > 0){
+      this.auraDisabledEffect -= time;
+      this.auraDisabled = true;
+      if(this.auraDisabledEffect <= 0)this.auraDisabled = false;
+    }
     var timeFix = time / (1000 / 30);
     if(game.players[0].className == "Chrono"){
       this.teleportPosition.push(new Vector(this.pos.x,this.pos.y));
@@ -1920,6 +1925,9 @@ class Enemy extends Entity {
     this.applyEffects(time);
     this.radius *= this.radiusMultiplier;
     this.auraSize = this.auraStaticSize * this.radiusMultiplier;
+    if (this.auraDisabled){
+      this.auraSize = 0;
+    }
     this.radiusMultiplier = 1;
     if(this.sugar_rush>0){
       this.speedMultiplier*=0.05;
