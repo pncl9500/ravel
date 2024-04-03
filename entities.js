@@ -904,6 +904,9 @@ class Player {
     this.pos.x = x;
     this.pos.y = y;
   }
+  doTeleEffect(){
+
+  }
 }
 class Basic extends Player {
   constructor(pos, speed) {
@@ -1872,11 +1875,12 @@ class Enemy extends Entity {
   }
   applyEffects(time){
     for (var i = 0; i < this.effects.length; i++){
-      this.effects[i].apply(time, this);
       if (this.effects[i].toRemove){
         this.effects.splice(i, 1);
         i--;
+        break;
       }
+      this.effects[i].apply(time, this);
     }
   }
   addEffect(eff){
@@ -1909,6 +1913,16 @@ class Enemy extends Entity {
       this.HarmlessEffect -= time;
       this.Harmless = true;
       if(this.HarmlessEffect <= 0)this.Harmless = false;
+    }
+    if (this.consume){
+      this.consumeBehavior(time);
+    }
+    if (this.isExpelBullet){
+      this.expelBulletBehavior(time);
+    }
+    if (this.acid > 0){
+      this.speedMultiplier *= 0.15;
+      this.acid -= time;
     }
     if (this.auraDisabledEffect > 0){
       this.auraDisabledEffect -= time;
@@ -1958,6 +1972,43 @@ class Enemy extends Entity {
   }
   auraEffect(player, worldPos) {
 
+  }
+  consumeBehavior(time){
+    this.Harmless = true;
+    //this is the kludgiest shit ever but this should honestly just be a property that every enemy has
+    //i never want to write code like this again
+    this.area = game.worlds[this.consume.world].areas[this.consume.area];
+    var offx = game.worlds[this.consume.world].areas[this.consume.area].pos.x;
+    var offy = game.worlds[this.consume.world].areas[this.consume.area].pos.y;
+    this.pos.x = this.consume.pos.x + (Math.random() - 0.5) * 0.5 - offx;
+    this.pos.y = this.consume.pos.y + (Math.random() - 0.5) * 0.5 - offy;
+    this.radiusMultiplier *= 0.25;
+  }
+  expelBulletBehavior(time){
+    var area = this.area;
+    this.Harmless = true;
+    this.HarmlessEffect = 2000; 
+    if (this.isExpelBullet.toRemove){
+      this.isExpelBullet = false;
+    }
+    for(var i in area.entities){
+      const entities = area.entities[i];
+      for(var j in entities){
+        const entity = entities[j];
+        if (!entity.isExpelBullet) {
+          if (distance(this.pos, new Vector(entity.pos.x, entity.pos.y)) < this.radius + entity.radius && !entity.imune) {
+            entity.acid = 3500;
+          }
+        }
+      }
+    }
+  }
+  undoConsume(){
+    this.Harmless = true;
+    this.HarmlessEffect = 2000; 
+    this.consume = false;
+    this.no_collide = false;
+    this.collide = true;
   }
 }
 class Unknown extends Enemy {

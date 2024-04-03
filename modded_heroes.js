@@ -1,11 +1,21 @@
 class EnemyEffect {
-  constructor(duration, source, priority){
+  constructor(duration, source, priority, allowDupes = false){
     this.duration = duration;
     this.life = duration;
     this.noDuration = duration === -1;
     this.source = source;
     this.priority = priority;
     this.toRemove = false;
+    //this shit does not work, i give up
+    this.allowDupes = allowDupes;
+    if (!allowDupes){
+      for (var i = 0; i < source.effects.length; i++){
+        if (source.effects[i].constructor.name === this.constructor.name){
+          this.toRemove = true;
+          return;
+        }
+      }
+    }
   }
   apply(time, target){
     if (!this.noDuration){
@@ -22,6 +32,7 @@ class EnemyEffect {
 class JudgementEffect extends EnemyEffect{
   constructor(duration, source){
     super(duration, source, 1000);
+    this.allowDupes = false;
   }
   doEffect(time, target, source){
     target.radiusMultiplier = Math.min((source.radius / target.fixedRadius), 1);
@@ -68,7 +79,6 @@ class Grom extends Player {
   abilities(time, area, offset) {
     if (this.firstAbility && this.firstAbilityCooldown == 0 && this.energy >= 15) {
       this.corrodeUses++;
-      console.log(this.corrodeUses);
       if (this.corrodeUses >= 2){
         this.corrodeUses = 0;
         this.firstAbilityCooldown = this.firstTotalCooldown;
@@ -92,7 +102,6 @@ class Grom extends Player {
       angle = Math.atan2(directionY, directionX);
     }
     const world = game.worlds[this.world];
-    console.log(world);
     const bullet = new CorrodeProjectile(new Vector(this.pos.x-world.pos.x-area.pos.x,this.pos.y-world.pos.y-area.pos.y),angle,this.world)
     if(!area.entities[bulletType]){area.entities[bulletType] = []}
     area.entities[bulletType].push(bullet);
@@ -178,9 +187,10 @@ class CorrodeProjectileExploded extends Enemy {
 
 class CorrodeEffect extends EnemyEffect{
   constructor(duration, source){
-    super(duration, source, 100);
+    super(duration, source, 100, true);
     this.targets = [];
     this.targetMultipliers = [];
+    this.allowDupes = true;
   }
   doEffect(time, target, source){
     if (source.toRemove){
@@ -210,4 +220,107 @@ class CorrodeEffect extends EnemyEffect{
       }
     }
   }
+}
+
+class Cibus extends Player {
+  //da eetah
+  constructor(pos, speed) {
+    super(pos, 0, speed, "#FFA588", "Cibus");
+    this.hasAB = true; this.ab1L = 5; this.ab2L = 5; this.firstTotalCooldown = 3500; this.secondTotalCooldown = 200;
+    this.enemiesEaten = 0;
+    this.consume = false;
+    this.fixedRadius = 18.56/32;
+    this.eatenEnemies = [];
+  }
+  abilities(time,area,offset){
+    this.speedAdditioner -= this.enemiesEaten;
+    if (this.enemiesEaten < 3){
+      if (this.firstAbilityCooldown === 0 && this.enemiesEaten < 3) {
+        this.consume = true;
+      }
+      this.color = "#FFA588";
+    } else {
+      this.color = "#AA7122";
+    }
+    if (this.isDead){
+      this.enemiesEaten = 0;
+      this.eatenEnemies = [];
+    }
+    if (this.secondAbility && this.secondAbilityCooldown == 0 && this.energy >= 5 * this.enemiesEaten && this.enemiesEaten > 0) {
+      this.energy -= 5 * this.enemiesEaten;
+      this.secondAbilityCooldown = this.secondTotalCooldown;
+      for (var i = 0; i < this.eatenEnemies.length; i++){
+        this.spawnBullet(area, "expel_projectile",i)
+      }
+      this.eatenEnemies = [];
+      this.enemiesEaten = 0;
+      this.invicible = true;
+      //if the framerate is too low the player will probably die instantly upon using this ability. too bad!
+      this.invicible_time = 200;
+    }
+  }
+  removeConsume(){
+    this.enemiesEaten++;
+    this.consume = false;
+    this.firstAbilityCooldown = this.firstTotalCooldown;
+  }
+  undoConsume(){
+    for (var i = 0; i < this.eatenEnemies.length; i++){
+      this.eatenEnemies[i].undoConsume();
+    }
+    this.invicible = true;
+    this.eatenEnemies = [];
+    this.enemiesEaten = 0;
+  }
+  doTeleEffect(){
+    this.undoConsume();
+  }
+  spawnBullet(area,bulletType,i){
+    let angle;
+    if(this.mouseActive){
+      angle = this.mouse_angle;
+    } else {
+      var directionX = 0;
+      var directionY = 0;
+      if(this.oldPos.x-this.pos.x<0){directionX = 1;}
+      else if(this.oldPos.x-this.pos.x>0){directionX = -1;}
+      if(this.oldPos.y-this.pos.y<0){directionY = 1;}
+      else if(this.oldPos.y-this.pos.y>0){directionY = -1;}
+      angle = Math.atan2(directionY, directionX);
+    }
+    const world = game.worlds[this.world];
+    const bullet = new ExpelProjectile(new Vector(this.pos.x-world.pos.x-area.pos.x,this.pos.y-world.pos.y-area.pos.y),angle + (Math.random() - 0.5) * 0.1, this.eatenEnemies[i]);
+    if(!area.entities[bulletType]){area.entities[bulletType] = []}
+    area.entities[bulletType].push(bullet);
+  }
+}
+
+class ExpelProjectile extends Enemy{
+  constructor(pos,angle,tiedEnemy) {
+    super(pos, entityTypes.indexOf("corrode_projectile") - 1, 16/32, undefined, undefined, "#00000000");
+    this.clock = 0;
+    this.angle = angle;
+    this.no_collide = true;
+    this.imune = true;
+    this.speed = 40;
+    this.outline = false;
+    this.isEnemy = false;
+    this.tiedEnemy = tiedEnemy;
+    this.tiedEnemy.consume = false;
+    this.tiedEnemy.isExpelBullet = this;
+    this.tiedEnemy.no_collide = false;
+    this.tiedEnemy.collide = true;
+    this.tiedEnemy.Harmless = true;
+    this.angleToVel();
+  }
+  behavior(time, area, offset, players) {
+    this.tiedEnemy.pos.x = this.pos.x;
+    this.tiedEnemy.pos.y = this.pos.y;
+    this.clock += time;
+    if(this.clock>=400){
+      this.toRemove = true;
+      this.tiedEnemy.isExpelBullet = false;
+    } 
+  }
+  
 }

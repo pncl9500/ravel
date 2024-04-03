@@ -75,6 +75,7 @@ class Game {
               maxArea = j;
             }
           }
+          player.doTeleEffect();
           player.area = maxArea;
           player.pos = targetPoint;
           this.worlds[player.world].areas[player.area].load();

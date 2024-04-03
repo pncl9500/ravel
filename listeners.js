@@ -123,7 +123,7 @@ window.onload = function() {
 
     if(settings.sandbox)Delay = 0;
 
-    const player = new [Basic,Magmax,Rime,Morfe,Aurora,Necro,Brute,Shade,Chrono,Reaper,Rameses,Cent,Jotunn,Candy,Mirage,Clown,Burst,Lantern,Pole,Polygon,Poop,Minerva,Grom][hero.selectedIndex](new Vector(Math.random() * 7 + 2.5, Math.random() * 10 + 2.5),5);
+    const player = new [Basic,Magmax,Rime,Morfe,Aurora,Necro,Brute,Shade,Chrono,Reaper,Rameses,Cent,Jotunn,Candy,Mirage,Clown,Burst,Lantern,Pole,Polygon,Poop,Minerva,Grom,Cibus][hero.selectedIndex](new Vector(Math.random() * 7 + 2.5, Math.random() * 10 + 2.5),5);
     game.players.push(player);
     
     loadImages(game.players[0].className);

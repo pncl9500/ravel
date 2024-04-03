@@ -307,6 +307,9 @@ function death(player,enemy){
   } else if (player.className == "Chrono" && !player.isDead && player.energy+player.regen*2.5 >= 28 && player.firstAbilityCooldown < 3000){
     player.deathTimer = 60000;
     player.isDead = true;
+  } else if (player.className == "Cibus"){
+    player.isDead = false;
+    player.undoConsume();
   } else if(player.isDead && player.deathTimer <= 0 ){
     player.isDead = false;
   }
@@ -567,11 +570,27 @@ function interactionWithEnemy(player,enemy,offset,barrierInvulnerable, corrosive
     if(enemy.healing > 0)player.isDead = false;
     if((barrierInvulnerable&&player.inBarrier)||player.god)return {dead: false, inDistance: inDistance}
 
+    if(player.consume && !enemy.consume && !enemy.imune && enemy.fixedRadius < player.fixedRadius && !enemy.isExpelBullet){
+      enemy.Harmless = true;
+      enemy.HarmlessEffect = 2000; 
+      enemy.consume = player;
+      player.eatenEnemies.push(enemy);
+      //dude what the fuck
+      enemy.no_collide = true;
+      enemy.collide = false
+      Harmless = true;
+      player.removeConsume();
+    }
     if(player.night && !immune && !enemy.disabled){
       player.night=false;
       player.speedAdditioner=0;
       enemy.Harmless=true;
       enemy.HarmlessEffect = 2000; 
+      Harmless = true;
+    }
+    if(enemy.acid){
+      enemy.Harmless=true;
+      enemy.HarmlessEffect = 3000; 
       Harmless = true;
     }
     if(enemy.texture=="pumpkinOff" || enemy.radius <= 0 || Harmless || enemy.shatterTime > 0){
@@ -752,6 +771,9 @@ function loadImages(character){
       abilityTwo.src = "texture/pardon.png";
     case "Grom":
       abilityOne.src = "texture/mortar.png";
+    case "Cibus":
+      abilityOne.src = "texture/mortar.png";
+      abilityTwo.src = "texture/mortar.png";
   }
 
   if(document.getElementById("wreath").value.includes("Crown")){
