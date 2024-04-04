@@ -766,14 +766,22 @@ function loadImages(character){
     case "Mirage":
       abilityOne.src = "texture/shift.png";
       abilityTwo.src = "texture/obscure.png";
+      break;
     case "Minerva":
       abilityOne.src = "texture/judgement.png";
       abilityTwo.src = "texture/pardon.png";
+      break;
     case "Grom":
       abilityOne.src = "texture/mortar.png";
+      break;
     case "Cibus":
       abilityOne.src = "texture/mortar.png";
       abilityTwo.src = "texture/mortar.png";
+      break;
+    case "Hestia":
+      abilityOne.src = "texture/kindkiss.png";
+      abilityTwo.src = "texture/calm.png";
+      break;
   }
 
   if(document.getElementById("wreath").value.includes("Crown")){

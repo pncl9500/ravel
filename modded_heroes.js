@@ -7,15 +7,15 @@ class EnemyEffect {
     this.priority = priority;
     this.toRemove = false;
     //this shit does not work, i give up
-    this.allowDupes = allowDupes;
-    if (!allowDupes){
-      for (var i = 0; i < source.effects.length; i++){
-        if (source.effects[i].constructor.name === this.constructor.name){
-          this.toRemove = true;
-          return;
-        }
-      }
-    }
+    // this.allowDupes = allowDupes;
+    // if (!allowDupes){
+    //   for (var i = 0; i < source.effects.length; i++){
+    //     if (source.effects[i].constructor.name === this.constructor.name){
+    //       this.toRemove = true;
+    //       return;
+    //     }
+    //   }
+    // }
   }
   apply(time, target){
     if (!this.noDuration){
@@ -39,6 +39,19 @@ class JudgementEffect extends EnemyEffect{
     target.speedMultiplier = Math.min(source.speed / target.speed, 1);
     //uncomment for superhot minerva
     //target.speedMultiplier = Math.min((Math.sqrt(source.vel.x * source.vel.x + source.vel.y * source.vel.y)) / target.speed, 1);
+  }
+}
+
+class CalmEffect extends EnemyEffect{
+  constructor(duration, source, originalTarget){
+    super(duration, source, 10);
+    this.allowDupes = false;
+    this.angle = originalTarget.angle;
+  }
+  doEffect(time, target, source){
+    target.speedMultiplier *= 0.4
+    target.angle = this.angle;
+    target.angleToVel();
   }
 }
 
@@ -323,4 +336,35 @@ class ExpelProjectile extends Enemy{
     } 
   }
   
+}
+
+class Hestia extends Player {
+  constructor(pos, speed) {
+    super(pos, 0, speed, "#9f395b", "Hestia");
+    this.hasAB = true; this.ab1L = 0; this.ab2L = 5; this.firstTotalCooldown = 10; this.secondTotalCooldown = 5000;
+    this.calmDuration = 4000;
+  }
+  abilities(time, area, offset) {
+    if (this.secondAbility && this.secondAbilityCooldown == 0) {
+      if(this.aura && this.energy>=20){
+        for (var i in area.entities) {
+          for (var j in area.entities[i]) {
+            var entity = area.entities[i][j];
+            if (distance(entity.pos, new Vector(this.pos.x - offset.x, this.pos.y - offset.y)) < (200 / 32) + entity.radius) {
+              if (!area.entities[i][j].imune) {
+                area.entities[i][j].addEffect(new CalmEffect(this.calmDuration, this, area.entities[i][j]));
+                area.entities[i][j].auraDisabled = true;
+                area.entities[i][j].auraDisabledEffect = this.calmDuration;
+
+              }
+            }
+          }
+        }
+        this.aura = false;
+        this.auraType = -1;
+        this.energy -= 10;
+        this.secondAbilityCooldown = this.secondTotalCooldown;
+      } else {this.aura = true; this.auraType = 6;}
+    }
+  }
 }
