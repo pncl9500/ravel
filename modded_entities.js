@@ -700,7 +700,6 @@ class Puffing extends Enemy {
   }
   behavior(time, area, offset, players){
     var dist = distance({x: players[0].pos.x - offset.x, y: players[0].pos.y - offset.y}, this.pos);
-    console.log(dist);
-    this.radiusMultiplier = 1 + (this.maxSizeMult / dist);
+    this.radiusMultiplier = Math.min(1 + (this.maxSizeMult / dist), this.maxSizeMult);
   }
 }
