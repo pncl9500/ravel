@@ -1133,6 +1133,15 @@ class Area {
           if (this.preset[i].type[rand] == "sap_sniper") {
             enemy = new SapSniper(new Vector(posX, posY), radius / 32, speed, angle)
           }
+          if (this.preset[i].type[rand] == "drowning") {
+            enemy = new Drowning(new Vector(posX, posY), radius / 32, speed, angle, auraRadius)
+          }
+          if (this.preset[i].type[rand] == "pull_sniper") {
+            enemy = new PullSniper(new Vector(posX, posY), radius / 32, speed, angle)
+          }
+          if (this.preset[i].type[rand] == "puffing") {
+            enemy = new Puffing(new Vector(posX, posY), radius / 32, speed, angle)
+          }
           enemy.isSpawned = true;
           this.entities[this.preset[i].type].push(enemy)
         }
@@ -1289,6 +1298,13 @@ class Area {
         }
         var bullet = new SapSniperProjectile(new Vector(pos.x,pos.y), angle, radius, speed);
         this.entities["sap_projectile"].push(bullet);
+        break;
+      case 19:
+        if (!this.entities["pull_projectile"]) {
+          this.entities["pull_projectile"] = [];
+        }
+        var bullet = new PullSniperProjectile(new Vector(pos.x,pos.y), angle, radius, speed, spawner);
+        this.entities["pull_projectile"].push(bullet);
         break;
     }
   }

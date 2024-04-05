@@ -173,9 +173,11 @@ class Player {
     this.riptideLastDirY = 0;
     this.cloud = false;
     this.storm = false;
-    this.swamp = true;
+    this.swamp = false;
     this.swampDebuff = 0;
     this.sapTimer = 0;
+    this.drowning = false;
+    this.drowningSpeed = 0;
     this.dyingPos = new Vector(0, 0);
     this.level = 1;
     this.points = (settings.no_points)? 0 : 150;
@@ -676,6 +678,14 @@ class Player {
         this.energy = this.maxEnergy;
       }
     }
+    if (this.drowning){
+      this.drowningSpeed += 0.005 * time / (1000 / 30);
+    } else {
+      this.drowningSpeed -= 0.005 * time / (1000 / 30);
+      if (this.drowningSpeed < 0){
+        this.drowningSpeed = 0;
+      }
+    }
 
     if(this.burning) {
       this.burningTimer+=time*this.effectImmune/this.effectReplayer;
@@ -776,6 +786,7 @@ class Player {
     }
     this.riptide = false;
     this.swamp = false;
+    this.drowning = false;
     if (!this.cloud && !this.storm){
       this.firstAbilityCooldown -= time;
       this.secondAbilityCooldown -= time;

@@ -125296,7 +125296,11 @@ stellarSquare = {
           width: 960,
           height: 960,
           spawner: [
-            { count: 4, radius: 8, speed: 2, types: ["sap_sniper"]},
+            { count: 2, radius: 12, speed: 2, types: ["drowning"], drowning_radius: 180},
+            { count: 2, radius: 8, speed: 3, types: ["drowning"], drowning_radius: 80},
+            { count: 1, radius: 24, speed: 2, types: ["pull_sniper"]},
+            { count: 1, radius: 40, speed: 2, types: ["pull_sniper"]},
+            { count: 8, radius: 12, speed: 2, types: ["puffing"]},
           ],
         },
       ],

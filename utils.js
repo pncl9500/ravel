@@ -87,16 +87,18 @@ var entityTypes = [
   "rotor", //done, but more params could be added
   "nightshade", //done
   "water_trail", //done
-  "riptide", //mostly done except for the aura size parameter!
+  "riptide", //done
   "cloud", //done
   "rain", //done
   "vine",
   "swamp",
-  "sap",
-  "leaflet",
 
   "disc",
-  "sap_sniper"
+  "sap_sniper",
+
+  "drowning",
+  "pull_sniper",
+  "puffing",
 
   /* Those cannot be spawned by area spawner
   "reverse_projectile",

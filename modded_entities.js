@@ -614,3 +614,93 @@ class SapSniperProjectile extends Entity {
     }
   }
 }
+
+class Drowning extends Enemy {
+  constructor(pos, radius, speed, angle, auraRadius = 150) {
+    super(pos, entityTypes.indexOf("drowning") - 1, radius, speed, angle, "#174799", true, "rgba(13, 36, 77, 0.2)", auraRadius / 32);
+  }
+  auraEffect(player, worldPos) {
+    if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.auraSize) {
+      player.drowning = true;
+      player.energy -= player.drowningSpeed;
+      if (player.energy < 0){
+        death(player);
+        player.drowning = false;
+        player.drowningSpeed = 0;
+        player.energy = 0;
+      }
+    }
+  }
+}
+
+
+class PullSniper extends Enemy {
+  constructor(pos, radius, speed, angle) {
+    super(pos, entityTypes.indexOf("pull_sniper") - 1, radius, speed, angle, "#d494c5");
+    this.releaseTime = 3000;
+    this.clock = Math.random() * this.releaseTime;
+  }
+  behavior(time, area, offset, players) {
+    this.clock += time;
+    if (this.clock > this.releaseTime) {
+      var min = 18.75;
+      var index;
+      var boundary = area.getActiveBoundary();
+      for (var i in players) {
+        if (distance(this.pos, new Vector(players[i].pos.x - offset.x, players[i].pos.y - offset.y)) < min && pointInRectangle(new Vector(players[i].pos.x - offset.x, players[i].pos.y - offset.y), new Vector(boundary.x, boundary.y), new Vector(boundary.w, boundary.h))) {
+          min = distance(this.pos, new Vector(players[i].pos.x - offset.x, players[i].pos.y - offset.y));
+          index = i;
+        }
+      }
+      if (index != undefined&&!players[0].night&&!players[0].god&&!players[0].isDead) {
+        var dX = (players[index].pos.x - offset.x) - this.pos.x;
+        var dY = (players[index].pos.y - offset.y) - this.pos.y;
+        area.addSniperBullet(19, this.pos, Math.atan2(dY, dX), this.radius * 0.5, 10, undefined, this)
+        this.clock = 0;
+      }
+    }
+  }
+}
+
+class PullSniperProjectile extends Entity {
+  constructor(pos, angle, radius, speed, parent) {
+    super(pos, radius, "#d494c5");
+    this.vel.x = Math.cos(angle) * speed;
+    this.vel.y = Math.sin(angle) * speed;
+    this.Harmless = false;
+    this.clock = 0;
+    this.weak = true;
+    this.push_time = 1000;
+    this.stime = 0;
+    this.soffset = {x: 0, y:0};
+    this.parent = parent;
+  }
+  behavior(time, area, offset, players){
+    this.stime = time;
+    this.clock += time;
+    //im losing it
+    this.soffset = offset;
+  }
+  interact(player, worldPos) {
+    if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.radius && !invulnerable(player)) {
+      player.knockback_player(this.stime,this.parent,this.push_time,this.radius*-128*32-50,this.soffset);
+
+      this.vel.x = Math.cos(0) * this.speed;
+      this.vel.y = Math.sin(0) * this.speed;
+      this.toRemove = true;
+    }
+  }
+}
+
+
+class Puffing extends Enemy {
+  constructor(pos, radius, speed, angle) {
+    super(pos, entityTypes.indexOf("puffing") - 1, radius, speed, angle, "#e8dfae");
+    this.maxSizeMult = 8;
+  }
+  behavior(time, area, offset, players){
+    var dist = distance({x: players[0].pos.x - offset.x, y: players[0].pos.y - offset.y}, this.pos);
+    console.log(dist);
+    this.radiusMultiplier = 1 + (this.maxSizeMult / dist);
+  }
+}
