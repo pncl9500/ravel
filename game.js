@@ -212,6 +212,7 @@ class World {
     var last_height;
     var last_width;
     var last_right;
+    var last_bottom;
     var last_y;
     var last_area_y;
     var last_area_right;
@@ -300,8 +301,11 @@ class World {
         if (areax.toString().startsWith("last_right")) {
           areax = last_right - areaPosX;
         }
-        if (areay.toString().startsWith("last_y") || areay.toString().startsWith("last_bottom")) {
+        if (areay.toString().startsWith("last_y")) {
           areay = last_y;
+        }
+        if (areay.toString().startsWith("last_bottom")) {
+          areay = last_bottom - areaPosY;
         }
         var absoluteZoneRight = areax+zone.width+areaPosX;
         if(last_pos<absoluteZoneRight){
@@ -428,6 +432,7 @@ class World {
         area.zones.push(block);
         last_y = areay;
         last_right = xPos + widthSize;
+        last_bottom = yPos + heightSize;
         last_height = heightSize;
         last_width = widthSize;
         last_area_right = last_pos;
