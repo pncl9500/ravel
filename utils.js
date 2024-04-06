@@ -324,6 +324,8 @@ function death(player,enemy){
   }
   player.teleportPosition = [];
   player.deathCounter++;
+  player.pull = false;
+  player.pullEffect = 0;
   if(!settings.deathcd){
     player.firstAbilityCooldown = 0; 
     player.secondAbilityCooldown = 0;

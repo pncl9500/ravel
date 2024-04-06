@@ -178,6 +178,9 @@ class Player {
     this.sapTimer = 0;
     this.drowning = false;
     this.drowningSpeed = 0;
+    this.pull = false;
+    this.pullEffect = 0;
+    this.pullSource = null;
     this.dyingPos = new Vector(0, 0);
     this.level = 1;
     this.points = (settings.no_points)? 0 : 150;
@@ -447,6 +450,10 @@ class Player {
     const timeFix = time / (1000 / 30);
     this.regenDisableTimer -= time;
     this.sapTimer -= time;
+    this.pullEffect -= time;
+    if(this.pullEffect > 0){
+      this.pull = true;
+    }
     this.inBarrier = false;
 
     if(this.flashlight_active || this.lantern_active){
@@ -498,12 +505,16 @@ class Player {
         //replace 10 with riptide pull strength instead of it being a magic number if you actually want to use riptide enemies
         if (!(this.riptideLastDirY === 0 && this.riptideLastDirX === 0)){
           this.pos.x += Math.cos(Math.atan2(this.riptideLastDirY, this.riptideLastDirX)) * 0.2 * timeFix;
-          this.pos.y += Math.sin(Math.atan2(this.riptideLastDirY, this.riptideLastDirX)) * 0.2 * timeFix;  
+          this.pos.y += Math.sin(Math.atan2(this.riptideLastDirY, this.riptideLastDirX)) * 0.2 * timeFix;
         }
         if (!(this.dirX === 0 && this.dirY === 0)){
           this.riptideLastDirX = this.dirX;
           this.riptideLastDirY = this.dirY;
         }
+      }
+      if (this.pull){
+        this.pos.x += Math.cos(Math.atan2(this.pullSource.pos.y-this.pos.y+game.worlds[this.world].areas[this.area].pos.y+game.worlds[this.world].pos.y, this.pullSource.pos.x-this.pos.x+game.worlds[this.world].areas[this.area].pos.x+game.worlds[this.world].pos.x)) * 0.2 * timeFix;
+        this.pos.y += Math.sin(Math.atan2(this.pullSource.pos.y-this.pos.y+game.worlds[this.world].areas[this.area].pos.y+game.worlds[this.world].pos.y, this.pullSource.pos.x-this.pos.x+game.worlds[this.world].areas[this.area].pos.x+game.worlds[this.world].pos.x)) * 0.2 * timeFix;
       }
       if(this.collides&&this.slippery){
         this.d_x*=2;
@@ -780,6 +791,7 @@ class Player {
     this.charging = false;
     this.burning = false;
     this.slippery = false;
+    this.pull = false;
     if (this.riptide === false){
       this.riptideLastDirX = 0;
       this.riptideLastDirY = 0;

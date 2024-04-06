@@ -671,8 +671,6 @@ class PullSniperProjectile extends Entity {
     this.clock = 0;
     this.weak = true;
     this.push_time = 1000;
-    this.stime = 0;
-    this.soffset = {x: 0, y:0};
     this.parent = parent;
   }
   behavior(time, area, offset, players){
@@ -683,11 +681,9 @@ class PullSniperProjectile extends Entity {
   }
   interact(player, worldPos) {
     if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.radius && !invulnerable(player)) {
-      player.knockback_player(this.stime,this.parent,this.push_time,this.radius*-128*32-50,this.soffset);
-
-      this.vel.x = Math.cos(0) * this.speed;
-      this.vel.y = Math.sin(0) * this.speed;
-      this.toRemove = true;
+      player.pull = true;
+      player.pullEffect = 4000;
+      player.pullSource = this.parent;
     }
   }
 }
