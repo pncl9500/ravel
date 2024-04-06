@@ -216,6 +216,7 @@ class World {
     var last_y;
     var last_area_y;
     var last_area_right;
+    var last_area_bottom;
     for (var i = 0; i < areas.length; i++) {
       var curArea = areas[i];
       var areaName = "Area "+(i+1);
@@ -240,6 +241,9 @@ class World {
       }
       if (curAreaYStr.startsWith("last_y") || curAreaYStr.startsWith("last_bottom")) {
         areaPosY = last_area_y;
+      }
+      if (curAreaYStr.startsWith("last_bottom")) {
+        areaPosY = last_area_bottom;
       }
       if(curAreaXStr.includes("+")){
          areaPosX += parseFloat(curAreaXStr.split("+")[1])
@@ -293,6 +297,7 @@ class World {
         }
       }
       var last_pos = 0;
+      var last_pos_y = 0;
       for (var j = 0; j < zones.length; j++) {
         var zone = zones[j];
         var type = zoneTypeToId(zone.type)
@@ -310,6 +315,10 @@ class World {
         var absoluteZoneRight = areax+zone.width+areaPosX;
         if(last_pos<absoluteZoneRight){
           last_pos = absoluteZoneRight;
+        }
+        var absoluteZoneBottom = areay+zone.height+areaPosY;
+        if(last_pos_y<absoluteZoneBottom){
+          last_pos_y = absoluteZoneBottom;
         }
         var xPos = areaPosX + areax;
         var yPos = areaPosY + areay;
@@ -419,6 +428,7 @@ class World {
         last_height = heightSize;
         last_width = widthSize;
         last_area_right = last_pos;
+        last_area_bottom = last_pos_y;
       }
       for (var k in assets) {
         var type = 0;
