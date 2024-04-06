@@ -692,10 +692,24 @@ class PullSniperProjectile extends Entity {
 class Puffing extends Enemy {
   constructor(pos, radius, speed, angle) {
     super(pos, entityTypes.indexOf("puffing") - 1, radius, speed, angle, "#e8dfae");
-    this.maxSizeMult = 8;
+    this.maxSizeMult = 3.5;
+    this.activationDistance = 250 / 32;
+    this.playerInRange = false;
+    this.sizeDecreaseThreshold = 2500;
+    this.timeSincePlayerInRange = this.sizeDecreaseThreshold;
+    this.targetPuffMul = 1;
+    this.puffMul = 1;
+    this.puffMulSmoothing = 0.05;
   }
   behavior(time, area, offset, players){
     var dist = distance({x: players[0].pos.x - offset.x, y: players[0].pos.y - offset.y}, this.pos);
-    this.radiusMultiplier = Math.min(1 + (this.maxSizeMult / dist), this.maxSizeMult);
+    if (dist < this.activationDistance&&!players[i].night&&!players[i].god&&!players[i].safeZone){
+      this.timeSincePlayerInRange = 0;
+    } else {
+      this.timeSincePlayerInRange += time;
+    }
+    this.targetPuffMul = this.timeSincePlayerInRange < this.sizeDecreaseThreshold ? this.maxSizeMult : 1;
+    this.puffMul += (this.targetPuffMul - this.puffMul) * this.puffMulSmoothing;
+    this.radiusMultiplier *= this.puffMul;
   }
 }
