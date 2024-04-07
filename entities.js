@@ -690,6 +690,7 @@ class Player {
       }
     }
     if (this.drowning){
+      this.energy -= this.drowningSpeed;
       this.drowningSpeed += 0.005 * time / (1000 / 30);
     } else {
       this.drowningSpeed -= 0.005 * time / (1000 / 30);

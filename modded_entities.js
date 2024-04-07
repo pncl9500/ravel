@@ -622,7 +622,6 @@ class Drowning extends Enemy {
   auraEffect(player, worldPos) {
     if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.auraSize) {
       player.drowning = true;
-      player.energy -= player.drowningSpeed;
       if (player.energy < 0){
         death(player);
         player.drowning = false;
