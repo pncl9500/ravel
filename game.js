@@ -1157,6 +1157,9 @@ class Area {
           if (this.preset[i].type[rand] == "puffing") {
             enemy = new Puffing(new Vector(posX, posY), radius / 32, speed, angle)
           }
+          if (this.preset[i].type[rand] == "bubble") {
+            enemy = new Bubble(new Vector(posX, posY), radius / 32, speed, angle)
+          }
           enemy.isSpawned = true;
           this.entities[this.preset[i].type].push(enemy)
         }

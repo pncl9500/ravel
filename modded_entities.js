@@ -713,3 +713,18 @@ class Puffing extends Enemy {
     this.radiusMultiplier *= this.puffMul;
   }
 }
+
+class Bubble extends Enemy{
+  constructor(pos, radius, speed, angle) {
+    super(pos, entityTypes.indexOf("bubble") - 1, radius, speed, angle, "rgba(190, 255, 255, 0.7)");
+    this.Harmless = true;
+    this.imune = true;
+  }
+  interact(player, worldPos) {
+    if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.radius) {
+      player.cloud = true;
+      player.drowning = false;
+      player.drowningSpeed = 0;
+    }
+  }
+}
