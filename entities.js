@@ -567,6 +567,7 @@ class Player {
       if(this.sticky || this.stickness>0){
         this.speedMultiplier *= (1-this.effectImmune*(this.stickness))*this.effectReplayer;
       }
+      this.effectImmune = 1;
       if(this.className == "Brute"){
         if(this.energy == this.maxEnergy){
           this.effectImmune = 0;

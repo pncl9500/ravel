@@ -721,6 +721,7 @@ class Bubble extends Enemy{
   }
   interact(player, worldPos) {
     if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.radius) {
+      player.effectImmune = 0;
       player.drowning = false;
       player.drowningSpeed = 0;
     }

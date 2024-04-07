@@ -125296,8 +125296,8 @@ stellarSquare = {
           width: 960,
           height: 960,
           spawner: [
-            { count: 15, radius: 48, speed: 2, types: ["bubble"]},
-            { count: 3, radius: 0, speed: 2, types: ["drowning"], drowning_radius: 500},
+            { count: 15, radius: 64, speed: 2, types: ["bubble"]},
+            { count: 1, radius: 0, speed: 2, types: ["freezing"], freezing_radius: 800},
           ],
         },
       ],
