@@ -694,11 +694,11 @@ class Puffing extends Enemy {
     this.maxSizeMult = 3.5;
     this.activationDistance = 250 / 32;
     this.playerInRange = false;
-    this.sizeDecreaseThreshold = 2500;
+    this.sizeDecreaseThreshold = 1000;
     this.timeSincePlayerInRange = this.sizeDecreaseThreshold;
     this.targetPuffMul = 1;
     this.puffMul = 1;
-    this.puffMulSmoothing = 0.05;
+    this.puffMulSmoothing = 0.02;
   }
   behavior(time, area, offset, players){
     var dist = distance({x: players[0].pos.x - offset.x, y: players[0].pos.y - offset.y}, this.pos);
