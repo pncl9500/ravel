@@ -715,7 +715,7 @@ class Puffing extends Enemy {
 
 class Bubble extends Enemy{
   constructor(pos, radius, speed, angle) {
-    super(pos, entityTypes.indexOf("bubble") - 1, radius, speed, angle, "rgba(20, 255, 255, 0.7)");
+    super(pos, entityTypes.indexOf("bubble") - 1, radius, speed, angle, "rgba(60, 150, 180, 0.7)");
     this.Harmless = true;
     this.imune = true;
   }
