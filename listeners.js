@@ -120,6 +120,9 @@ window.onload = function() {
     if (world.selectedIndex == 4) {
       loadOccluded();
     }
+    if (world.selectedIndex == 5) {
+      loadZenith();
+    }
 
     if(settings.sandbox)Delay = 0;
 
