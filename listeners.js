@@ -242,7 +242,7 @@ function handleFiles() {
       game = new Game()
       var world = new World(new Vector(0, 0), 0, jsyaml.load(evt.target.result));
       game.worlds[0] = world
-      document.getElementById("world").selectedIndex = 6;
+      document.getElementById("world").selectedIndex = document.getElementById("world").options.length - 1;
     }
   };
   reader.readAsBinaryString(fileList);
