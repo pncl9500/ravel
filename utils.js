@@ -100,6 +100,8 @@ var entityTypes = [
   "pull_sniper",
   "puffing",
   "bubble",
+  "poly",
+  "shattering",
 
   /* Those cannot be spawned by area spawner
   "reverse_projectile",
