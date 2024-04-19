@@ -727,3 +727,57 @@ class Bubble extends Enemy{
     }
   }
 }
+
+class Poly extends Enemy {
+  constructor(pos, radius, speed, angle) {
+    super(pos, entityTypes.indexOf("poly") - 1, radius, speed, angle, "#18171f");
+    this.turning = true;
+    this.clock = 0;
+    this.clockwise = Math.random() < 0.5;
+    this.divisions = Math.floor(Math.random() * 4) * 2 + 3;
+  }
+  behavior(time, area, offset, players) {
+    this.clock += time;
+    if (this.clock >= 3000 / this.divisions){
+      this.clock %= 3000 / this.divisions;
+      this.velToAngle();
+      this.angle += 2 * Math.PI / this.divisions * (this.clockwise ? 1 : -1);
+      this.angleToVel();
+    }
+  }
+}
+
+class Shattering extends Enemy {
+  constructor(pos, radius, speed, angle) {
+    super(pos, entityTypes.indexOf("shattering") - 1, radius, speed, angle, "#c2c2c2");
+    this.realRadius = radius;
+  }
+  behavior(time, area, offset, players) {
+    if (this.collision){
+      this.collision = false;
+      for (var i = 0; i < 3; i++){
+        area.addSniperBullet(20, this.pos, Math.random() * 2 * Math.PI, this.radius / 1.5, this.speed + 2);
+      }
+    }
+  }
+  colide(boundary) {
+    if(collisionEnemy(this,boundary,this.vel,this.pos,this.realRadius).col)this.collision=true;
+  }
+}
+
+class ShatteringProjectile extends Entity {
+  constructor(pos, angle, radius, speed) {
+    super(pos, radius, "#929292");
+    this.vel.x = Math.cos(angle) * speed;
+    this.vel.y = Math.sin(angle) * speed;
+    this.clock = 0;
+    this.weak = true;
+  }
+  behavior(time, area, offset, players) {
+    console.log("shittering behavior")
+    this.clock += time;
+  }
+  interact(player, worldPos) {
+    interactionWithEnemy(player,this,worldPos,true,this.corrosive,this.imune);
+  }
+}

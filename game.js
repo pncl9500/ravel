@@ -1160,6 +1160,12 @@ class Area {
           if (this.preset[i].type[rand] == "bubble") {
             enemy = new Bubble(new Vector(posX, posY), radius / 32, speed, angle)
           }
+          if (this.preset[i].type[rand] == "poly") {
+            enemy = new Poly(new Vector(posX, posY), radius / 32, speed, angle)
+          }
+          if (this.preset[i].type[rand] == "shattering") {
+            enemy = new Shattering(new Vector(posX, posY), radius / 32, speed, angle)
+          }
           enemy.isSpawned = true;
           this.entities[this.preset[i].type].push(enemy)
         }
@@ -1323,6 +1329,13 @@ class Area {
         }
         var bullet = new PullSniperProjectile(new Vector(pos.x,pos.y), angle, radius, speed, spawner);
         this.entities["pull_projectile"].push(bullet);
+        break;
+      case 20:
+        if (!this.entities["shattering_projectile"]) {
+          this.entities["shattering_projectile"] = [];
+        }
+        var bullet = new ShatteringProjectile(new Vector(pos.x,pos.y), angle, radius, speed, spawner);
+        this.entities["shattering_projectile"].push(bullet);
         break;
     }
   }
