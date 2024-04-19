@@ -102,6 +102,7 @@ var entityTypes = [
   "bubble",
   "poly",
   "shattering",
+  "snapping",
 
   /* Those cannot be spawned by area spawner
   "reverse_projectile",

@@ -781,3 +781,63 @@ class ShatteringProjectile extends Entity {
     interactionWithEnemy(player,this,worldPos,true,this.corrosive,this.imune);
   }
 }
+
+class Snapping extends Enemy {
+  constructor(pos, radius, speed, angle) {
+    super(pos, entityTypes.indexOf("snapping") - 1, radius, speed, angle, "#44000033");
+    this.outline = false;
+    this.Harmless = true;
+    this.nodeSpawned = false;
+  }
+  behavior(time, area, offset, players){
+    if (!this.nodeSpawned){
+      this.nodeSpawned = true;
+      this.spawnNode(area);
+    }
+  }
+  spawnNode(area){
+    const rotor_node = new SnappingNode(this);
+    if(!area.entities["rotor_node"]){area.entities["rotor_node"] = []}
+    area.entities["rotor_node"].push(rotor_node);
+  }
+}
+
+class SnappingNode extends Entity {
+  constructor(parent){
+    super(new Vector(parent.pos.x, parent.pos.y), parent.radius, "#440000")
+    this.parent = parent;
+    this.outline = true;
+    this.clock = 0;
+    this.switch = Math.random() < 0.5 ? false : true;
+    this.interval = 400;
+    this.targetX = this.pos.x;
+    this.targetY = this.pos.y;
+    this.xv = 0;
+    this.yv = 0;
+    this.fric = 0.3;
+    this.smoothing = 0.4;
+  }
+  behavior(time, area, offset, players){
+    this.clock += time;
+    if (this.clock > this.interval){
+      this.clock %= this.interval;
+      this.switch = !this.switch;
+      this.targetX = this.parent.pos.x;
+      this.targetY = this.parent.pos.y;
+      // if (this.switch === false){
+      //   this.targetX = this.parent.pos.x;
+      // } else {
+      //   this.targetY = this.parent.pos.y;
+      // }
+    }
+    this.xv += (this.targetX - this.pos.x) * this.smoothing * time / (1000 / 30);
+    this.yv += (this.targetY - this.pos.y) * this.smoothing * time / (1000 / 30);
+    this.pos.x += this.xv;
+    this.pos.y += this.yv;
+    this.xv *= Math.pow(this.fric, time / (1000 / 30));
+    this.yv *= Math.pow(this.fric, time / (1000 / 30));
+  }
+  interact(player, worldPos) {
+    interactionWithEnemy(player,this,worldPos,true,false,false,false,true)
+  }
+}

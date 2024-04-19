@@ -125474,6 +125474,47 @@ enemyTest = {
         },
       ],
     },
+    {
+      name: "Snapping",
+      x: "last_right",
+      y: 0,
+      zones: [
+        {
+          type: "exit",
+          x: 0,
+          y: 0,
+          translate: { x: -160, y: 0 },
+          width: 64,
+          height: 480,
+        },
+        { type: "safe", x: 64, y: 0, width: 256, height: 480 },
+        {
+          type: "active",
+          x: "last_right",
+          y: 0,
+          width: 1024,
+          height: 480,
+          spawner: [
+            { count: 3, radius: 32, speed: 5, types: ["snapping"] },
+          ],
+        },
+        {
+          type: "safe",
+          x: "last_right",
+          y: 0,
+          width: 256,
+          height: "last_height",
+        },
+        {
+          type: "exit",
+          x: "last_right",
+          y: 0,
+          translate: { x: 160, y: 0 },
+          width: 64,
+          height: "last_height",
+        },
+      ],
+    },
   ],
 };
 

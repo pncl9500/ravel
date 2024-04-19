@@ -1166,6 +1166,9 @@ class Area {
           if (this.preset[i].type[rand] == "shattering") {
             enemy = new Shattering(new Vector(posX, posY), radius / 32, speed, angle)
           }
+          if (this.preset[i].type[rand] == "snapping") {
+            enemy = new Snapping(new Vector(posX, posY), radius / 32, speed, angle)
+          }
           enemy.isSpawned = true;
           this.entities[this.preset[i].type].push(enemy)
         }
