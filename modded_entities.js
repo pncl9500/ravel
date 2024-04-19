@@ -702,7 +702,7 @@ class Puffing extends Enemy {
   }
   behavior(time, area, offset, players){
     var dist = distance({x: players[0].pos.x - offset.x, y: players[0].pos.y - offset.y}, this.pos);
-    if (dist < this.activationDistance&&!players[i].night&&!players[i].god&&!players[i].safeZone){
+    if (dist < this.activationDistance&&!players[0].night&&!players[0].god&&!players[0].safeZone){
       this.timeSincePlayerInRange = 0;
     } else {
       this.timeSincePlayerInRange += time;
