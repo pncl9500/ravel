@@ -809,7 +809,7 @@ class SnappingNode extends Entity {
     this.outline = true;
     this.clock = 0;
     this.switch = Math.random() < 0.5 ? false : true;
-    this.interval = 400;
+    this.interval = 500;
     this.targetX = this.pos.x;
     this.targetY = this.pos.y;
     this.xv = 0;
