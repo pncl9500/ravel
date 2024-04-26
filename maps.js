@@ -125546,8 +125546,7 @@ stellarSquare = {
           width: 960,
           height: 960,
           spawner: [
-            { count: 15, radius: 64, speed: 2, types: ["bubble"]},
-            { count: 1, radius: 0, speed: 2, types: ["slippery"], slippery_radius: 800},
+            { count: 60, radius: 24, speed: 2, types: ["wavy"], angle: 0},
           ],
         },
       ],

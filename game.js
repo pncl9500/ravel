@@ -938,7 +938,11 @@ class Area {
             enemy = new Repelling_Ghost(new Vector(posX, posY), radius / 32, speed, angle)
           }
           if (this.preset[i].type[rand] == "wavy") {
-            enemy = new Wavy(new Vector(posX, posY), radius / 32, speed, angle)
+            let overrideAngle = true;
+            if (this.preset[i].angle === undefined){
+              overrideAngle = false;
+            }
+            enemy = new Wavy(new Vector(posX, posY), radius / 32, speed, angle, overrideAngle)
           }
           if (this.preset[i].type[rand] == "zigzag") {
             enemy = new Zigzag(new Vector(posX, posY), radius / 32, speed, angle)

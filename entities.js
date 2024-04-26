@@ -3050,10 +3050,12 @@ class Repelling_Ghost extends Enemy {
   }
 }
 class Wavy extends Enemy {
-  constructor(pos, radius, speed, angle) {
+  constructor(pos, radius, speed, angle, overrideAngle) {
     super(pos, entityTypes.indexOf("wavy") - 1, radius, speed, angle, "#dd2606");
     this.velToAngle();
-    this.angle = Math.PI / 2;
+    if (!overrideAngle){
+      this.angle = Math.PI / 2;
+    }
     this.angleToVel();
     this.circleSize = 100;
     this.dir = 1;
