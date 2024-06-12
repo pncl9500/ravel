@@ -92,6 +92,7 @@ var entityTypes = [
   "rain", //done
   "vine",
   "swamp",
+  "ivy",
 
   "disc",
   "sap_sniper",

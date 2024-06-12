@@ -841,3 +841,26 @@ class SnappingNode extends Entity {
     interactionWithEnemy(player,this,worldPos,true,false,false,false,true)
   }
 }
+
+class Ivy extends Enemy {
+  constructor(pos, radius, speed, angle) {
+    super(pos, entityTypes.indexOf("ivy") - 1, radius, speed, angle, "#406643");
+    this.oldAngle = angle;
+  }
+  behavior(time, area, offset, players){
+    if (this.collision){
+      let timeFix = time / (1000 / 30);
+      console.log(timeFix);
+      this.angle = this.oldAngle;
+      this.angleToVel();
+      this.vel.x *= -1;
+      this.vel.y *= -1;
+      this.velToAngle();
+      this.collision = false;
+    }
+  }
+  colide(boundary){
+    this.oldAngle = this.angle;
+    if(collisionEnemy(this,boundary,this.vel,this.pos,this.radius).col)this.collision = true;
+  }
+}
