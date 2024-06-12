@@ -66,8 +66,8 @@ function loadTest(){
   game.worlds[0] = new World(new Vector(0, 0), 0, enemyTest);
 }
 
-function loadOccluded(){
-  game.worlds[0] = new World(new Vector(0, 0), 0, occludedOvergrowth);
+function loadOccludedOld(){
+  game.worlds[0] = new World(new Vector(0, 0), 0, occludedOvergrowthOld);
 }
 
 function loadZenith(){

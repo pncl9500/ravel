@@ -118,7 +118,7 @@ window.onload = function() {
       loadTest();
     }
     if (world.selectedIndex == 4) {
-      loadOccluded();
+      loadOccludedOld();
     }
     if (world.selectedIndex == 5) {
       loadZenith();
