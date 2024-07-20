@@ -92,7 +92,7 @@ window.onload = () => {
     gamed.style.display = "inline-block";
     inMenu = false;
     const world = document.getElementById("world");
-    if(world.selectedIndex < world.length - 1) [loadMain,loadHard,loadSecondary,loadTest,loadOccludedOld, loadZenith][world.selectedIndex]();
+    if(world.selectedIndex < world.length - 1) [loadMain,loadHard,loadSecondary,loadTest,loadOccludedOld,loadZenith][world.selectedIndex]();
     const player = new [Basic,Magmax,Rime,Morfe,Aurora,Necro,Brute,Shade,Chrono,Reaper,Rameses,Cent,Jotunn,Candy,Mirage,Clown,Burst,Lantern,Pole,Polygon,Poop][hero.selectedIndex](new Vector(Math.random() * 7 + 2.5, Math.random() * 10 + 2.5),5);
     game.players.push(player);
     
@@ -228,7 +228,8 @@ function handleFiles() {
   const reader = new FileReader();
   reader.onloadend = (evt) => {
     if (evt.target.readyState == FileReader.DONE) { // DONE == 2
-      game = new Game()
+      //commenting this is so unreasonably dubious. im scared.
+      //game = new Game()
       var world = new World(new Vector(0, 0), 0, jsyaml.load(evt.target.result));
       game.worlds[0] = world
       document.getElementById("world").selectedIndex = document.getElementById("world").options.length - 1;
