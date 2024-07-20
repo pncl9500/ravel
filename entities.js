@@ -26,22 +26,21 @@ class Entity {
     if(this.useRealVel){
       this.realVel.x = Math.cos(ang) * this.speed;
       this.realVel.y = Math.sin(ang) * this.speed;
-    } else {
-      this.vel.x = Math.cos(ang) * this.speed;
-      this.vel.y = Math.sin(ang) * this.speed;  
+      return;
     }
+    this.vel.x = Math.cos(ang) * this.speed;
+    this.vel.y = Math.sin(ang) * this.speed;  
   }
   velToAngle() {
     if(this.useRealVel){
       this.angle = Math.atan2(this.realVel.y, this.realVel.x);
-    } else {
-      this.angle = Math.atan2(this.vel.y, this.vel.x);
-      var dist = distance(new Vector(0, 0), this.vel);
-      this.speed = dist;
+      return;
     }
+    this.angle = Math.atan2(this.vel.y, this.vel.x);
+    var dist = distance(new Vector(0, 0), this.vel);
+    this.speed = dist;
   }
   update(time) {
-    if(this.color == "#a0a7d6"){if(time>averageFPS*2||isNaN(averageFPS)||!isActive){return}}
     this.radius = this.fixedRadius;
     this.velToAngle();
     this.angleToVel();
@@ -77,21 +76,29 @@ class Entity {
   }
 }
 class Pellet extends Entity {
-  constructor(pos) {
-    var p = ["#b84dd4", "#a32dd8", "#3b96fd", "#43c59b", "#f98f6b"];
+  constructor(pos,power) {
+    const p = ["#b84dd4", "#a32dd8", "#3b96fd", "#43c59b", "#f98f6b"];
     super(pos, 0.29, p[Math.floor(Math.random() * p.length)]);
+    this.multiplier = power;
   }
   behavior(time, area, offset, players) {
-    for (var i in players) {
-      if (distance(this.pos, new Vector(players[i].pos.x - offset.x, players[i].pos.y - offset.y)) < players[i].radius + this.radius) {
-        var boundary = area.getActiveBoundary();
-        var posX = Math.random() * boundary.w + boundary.x;
-        var posY = Math.random() * boundary.h + boundary.y;
+    for (const i in players) {
+      const player = players[i];
+      if (distance(this.pos, new Vector(player.pos.x - offset.x, player.pos.y - offset.y)) < player.radius + this.radius) {
+        const boundary = area.getActiveBoundary();
+        const posX = Math.random() * boundary.w + boundary.x;
+        const posY = Math.random() * boundary.h + boundary.y;
         this.pos = new Vector(posX, posY)
-        players[i].updateExperience(Math.ceil((parseInt(players[i].area)+1)/3));
-        if(players[i].usesPellets){
-          if(players[i].usesPellets == 1 || players[i].usesPellets == 3)if(players[i].firstPellet>0)players[i].firstPellet--;
-          if(players[i].usesPellets == 2 || players[i].usesPellets == 3)if(players[i].secondPellet>0)players[i].secondPellet--;
+        player.updateExperience(Math.ceil((parseInt(player.area)+1)/3)*this.multiplier);
+        if(player.usesPellets){
+          if(player.usesPellets == 1 || player.usesPellets == 3){
+            player.firstPellet-=this.multiplier;
+            if(player.firstPellet<0) player.firstPellet=0;
+          }
+          if(player.usesPellets == 2 || player.usesPellets == 3){
+            player.secondPellet-=this.multiplier;
+            if(player.secondPellet<0) player.secondPellet=0;
+          }
         }
       }
     }
@@ -99,7 +106,6 @@ class Pellet extends Entity {
 }
 class Player {
   constructor(pos, type, speed, color, className) {
-    window.localStorage.nick = document.getElementById("nick").value;
     this.name = document.getElementById("nick").value;
     this.id = Math.random();
     this.type = type;
@@ -108,6 +114,7 @@ class Player {
     this.ab1 = abilityOne;
     this.ab2 = abilityTwo;
     this.previousPos = this.pos;
+    this.previousAngle = 0;
     this.oldPos = this.pos;
     this.radius = 15 / 32;
     this.fixedRadius = 15 / 32;
@@ -118,6 +125,9 @@ class Player {
     this.speed = speed;
     this.world = 0;
     this.area = 0;
+    this.herocard = true;
+    this.minimap = true;
+    this.overlay = true;
     this.experienceDraining=false;
     this.maxEnergy = 30;
     this.vertSpeed = -1;
@@ -163,7 +173,7 @@ class Player {
     this.freezing = false;
     this.draining = false;
     this.inBarrier = false;
-    this.quicksand = false;
+    this.quicksand = {angle: undefined, strength: 5};
     this.charging = false;
     this.slippery = false;
     this.disabling = false;
@@ -210,6 +220,7 @@ class Player {
     this.collides = false;
     this.effectImmune = 1;
     this.effectReplayer = 1;
+    this.leadTime = 0;
     this.burningTimer = 0;
     this.stickness = 0;
     this.stickyTrailTimer = 0;
@@ -233,6 +244,43 @@ class Player {
     this.isDead = false;
   }
   input(input) {
+    if(this.overlay && settings.dev){
+      if(input.isMouse && ping.mouse.x != input.mouse.x && ping.mouse.y != input.mouse.y){
+        ping.mouse = new Vector(input.mouse.x,input.mouse.y)
+        let index = 0;
+        for(let i in ping.mouseArray){
+          let mouseInput = ping.mouseArray[i];
+          if(mouseInput.x == input.mouse.x && mouseInput.y == input.mouse.y){
+            index = i;
+          }
+        }
+        const pingTime = new Date().getTime() - ping.mouseTimer[index];
+        ping.array.push(pingTime);
+        //console.log("avgPing: " + ping.array.reduce((e,t)=>e+t)/ping.array.length,"ping: " + pingTime)
+      } /*else if(input.keys.length){
+        const inputKeys = getInputKeys(input.keys);
+        if(inputKeys.length){
+          ping.keys = [...inputKeys];
+          let index = findEqualKeys(ping.keysArray,inputKeys);
+          if(index !== null){
+            const pingTime = new Date().getTime() - ping.keysArray[index].timestamp;
+            console.log(pingTime)
+            ping.array.push(pingTime)
+            ping.keysArray.splice(index,1)
+          }
+        }
+      }*/else if (input.keys[68] && !ping.previous){
+        const pingTime = new Date().getTime()-ping.activationTime;
+        ping.previous = true;
+        ping.array.push(pingTime)
+        //console.log("avgPing: " + ping.array.reduce((e,t)=>e+t)/ping.array.length,"ping: " + pingTime)
+      } else if (!input.keys[68]){ping.previous = false}
+
+      if(ping.array.length > 25){
+        ping.array.shift();
+      }
+    }
+
     this.firstAbility = false;
     this.secondAbility = false;
     if(this.isDead) {
@@ -288,6 +336,7 @@ class Player {
           if (parseFloat(this.regen.toFixed(3)) < this.maxRegen && this.points > 0) {
             this.regen += 0.2;
             this.points--;
+            if(this.regen > this.maxRegen){this.regen = this.maxRegen;}
           }
         }
         if (this.energy-1>0 && !this.disabling && !this.magnetAbilityPressed && (this.magnet||this.flashlight||this.lantern) && (input.keys[76] || input.keys[67])) {
@@ -310,7 +359,7 @@ class Player {
           this.regenAdditioner=5;
         }
         if(this.minimum_speed>this.speed+this.speedAdditioner){this.speed=this.minimum_speed}
-        if (this.className!="Cent"&&this.shift == 2) {
+        if (!this.shouldCentMove() && this.shift == 2) {
           this.speedMultiplier *= 0.5;
           this.speedAdditioner *= 0.5;
         }
@@ -340,34 +389,34 @@ class Player {
         this.distance_movement = (this.speed*this.speedMultiplier)+this.speedAdditioner*(1-this.swampDebuff);
         this.mouseActive = false;
           if (input.isMouse&&!this.cent_is_moving&&!(input.keys[87] || input.keys[38]||input.keys[65] || input.keys[37]||input.keys[83] || input.keys[40]||input.keys[68] || input.keys[39])) {
-            this.mouse_distance_full_strenght = 150;
+            this.mouse_distance_full_strength = 150*settings.scale;
             this.mouseActive = true;
-            if(this.slippery){this.mouse_distance_full_strenght = 1;}
+            if(this.slippery){this.mouse_distance_full_strength = 1;}
 
-            if(this.className!="Cent" || (this.className=="Cent" && this.cent_input_ready)){
+            if(!this.shouldCentMove() || (this.shouldCentMove() && this.cent_input_ready)){
 
-              if(this.className=="Cent"){
+              if(this.shouldCentMove()){
                 this.cent_input_ready = false;
                 this.cent_is_moving = true;
                 this.cent_accelerating = true; 
-                this.mouse_distance_full_strenght = 1;
+                this.mouse_distance_full_strength = 1;
               }
 
               this.dirX = Math.round(input.mouse.x - width / 2);
               this.dirY = Math.round(input.mouse.y - height / 2);
               this.dist = distance(new Vector(0, 0), new Vector(this.dirX, this.dirY));
 
-              if (this.dist > this.mouse_distance_full_strenght) {
-                this.dirX = this.dirX * (this.mouse_distance_full_strenght / this.dist);
-                this.dirY = this.dirY * (this.mouse_distance_full_strenght / this.dist);
+              if (this.dist > this.mouse_distance_full_strength) {
+                this.dirX *= this.mouse_distance_full_strength / this.dist;
+                this.dirY *= this.mouse_distance_full_strength / this.dist;
               }
               
               this.mouse_angle = Math.atan2(this.dirY,this.dirX);
               this.input_angle = this.mouse_angle;
-              this.mouse_distance = Math.min(this.mouse_distance_full_strenght,Math.sqrt(this.dirX**2+this.dirY**2))
-              this.distance_movement*=this.mouse_distance/this.mouse_distance_full_strenght;
+              this.mouse_distance = Math.min(this.mouse_distance_full_strength,Math.sqrt(this.dirX**2+this.dirY**2))
+              this.distance_movement*=this.mouse_distance/this.mouse_distance_full_strength;
 
-              if(this.className == "Cent" && this.cent_input_ready){
+              if(this.shouldCentMove() && this.cent_input_ready){
                 this.cent_saved_angle = this.input_angle;
                 this.cent_input_ready = false;
                 this.cent_is_moving = true;
@@ -377,19 +426,19 @@ class Player {
               this.d_y = this.distance_movement*Math.sin(this.mouse_angle)
             }
 
-            if(this.className!="Cent"){this.vel.x = this.dirX * this.speed / this.mouse_distance_full_strenght;
-            this.addX = this.dirX * this.speedAdditioner/this.mouse_distance_full_strenght;
-            this.addY = this.dirY * this.speedAdditioner/this.mouse_distance_full_strenght;
-            if(!this.magnet||this.magnet&&this.safeZone){if(this.vertSpeed==-1){this.vel.y = this.dirY * this.speed / this.mouse_distance_full_strenght;}else{this.vel.y = this.dirY * this.vertSpeed / this.mouse_distance_full_strenght;}} 
+            if(!this.shouldCentMove()){this.vel.x = this.dirX * this.speed / this.mouse_distance_full_strength;
+            this.addX = this.dirX * this.speedAdditioner/this.mouse_distance_full_strength;
+            this.addY = this.dirY * this.speedAdditioner/this.mouse_distance_full_strength;
+            if(!this.magnet||this.magnet&&this.safeZone){if(this.vertSpeed==-1){this.vel.y = this.dirY * this.speed / this.mouse_distance_full_strength;}else{this.vel.y = this.dirY * this.vertSpeed / this.mouse_distance_full_strength;}} 
             }
         } else if (!this.cent_is_moving){
             this.dirY = 0; this.dirX = 0;
             this.moving = false;
             if(this.isMovementKeyPressed(input)){
-              if(this.className == "Cent" && this.cent_input_ready) this.cent_is_moving = true;
+              if(this.shouldCentMove() && this.cent_input_ready) this.cent_is_moving = true;
               this.moving=true;
               input.isMouse = false;
-              this.cent_input_ready = false;
+              if (this.shouldCentMove()) this.cent_input_ready = false;
               this.cent_accelerating = true;
             }
             if (input.keys[83] || input.keys[40]) {
@@ -408,17 +457,17 @@ class Player {
 
         this.input_angle = Math.atan2(this.dirY,this.dirX)
 
-        if(this.className == "Cent" && this.cent_input_ready){
+        if(this.shouldCentMove() && this.cent_input_ready){
           this.cent_saved_angle = this.input_angle;
           this.cent_input_ready = false;
           this.cent_is_moving = true;
         }
 
-        if(this.cent_distance){
+        if(this.shouldCentMove() && this.cent_distance){
           this.d_x = this.dirX * this.cent_distance;
           this.d_y = this.dirY * this.cent_distance;
         }
-        else if(this.moving&&!input.isMouse&&this.className!="Cent") {
+        else if(this.moving&&!input.isMouse&&!this.shouldCentMove()) {
           this.d_x = this.distance_movement * this.dirX;
           this.d_y = this.distance_movement * this.dirY;
         }
@@ -427,8 +476,15 @@ class Player {
       }
     }
   }
+  //returns true if the player should be using cent's movement system.
+  //returns true if player is cent with specifically no lead effect or non-cent with lead effect
+  shouldCentMove(){
+    //special case for harden
+    if (this.harden) return false;
+    return (this.className == "Cent" && this.leadTime <= 0) || (this.className != "Cent" && this.leadTime > 0);
+  }
   isMovementKeyPressed(input){
-    return (input.keys[87] || input.keys[38]||input.keys[65] || input.keys[37]||input.keys[83] || input.keys[40]||input.keys[68] || input.keys[39]);
+    return (input.keys[87] || input.keys[38] || input.keys[65] || input.keys[37] || input.keys[83] || input.keys[40] || input.keys[68] || input.keys[39]);
   }
   calculateExperience(HeroLevel){
     return Math.floor(Math.min(HeroLevel,100)*Math.min(HeroLevel+1,101)*2+Math.max(0,HeroLevel*(HeroLevel+1)*(2*HeroLevel-179)/60-3535))
@@ -470,8 +526,8 @@ class Player {
       this.victoryTimer -= time;
       if(this.victoryTimer<=0){this.timer = 0;}
     }
-    var world = game.worlds[this.world];
-    var area = world.areas[this.area];
+    const world = game.worlds[this.world];
+    const area = world.areas[this.area];
     if(!magnet){
       if(area.magnetism || world.magnetism){this.magnet = true; magnet = true;}
     }
@@ -532,7 +588,7 @@ class Player {
       if (this.fusion) {
         this.speedMultiplier *= 0.7;
       }
-      if (this.className!="Cent"&&this.shift == 2) {
+      if (!this.shouldCentMove()&&this.shift == 2) {
         this.speedMultiplier *= 0.5;
         this.speedAdditioner *= 0.5;
       }
@@ -583,7 +639,7 @@ class Player {
 
       if(this.mortarTime>0){this.speedMultiplier = 0;}
       if(this.minimum_speed>this.speed + this.speedAdditioner){this.speed=this.minimum_speed}
-        if(this.className == "Cent"){
+        if(this.shouldCentMove()){
           this.distance_movement = (this.speed*this.speedMultiplier)+this.speedAdditioner;
           this.cent_max_distance = this.distance_movement * 2;
           if(this.cent_is_moving){
@@ -662,14 +718,15 @@ class Player {
         this.nextLevelExperience=Number(this.nextLevelExperience.toFixed(5));
       }
     }
-    if(this.speedghost){
+    if(this.speedghost && this.speed - (0.1*this.effectImmune)/this.effectReplayer*timeFix >= 5){
+      if(!settings.no_points && parseFloat(this.speed.toFixed(1))%0.5 == 0)this.points++
       this.speed-=(0.1*this.effectImmune)/this.effectReplayer*timeFix;
       this.statSpeed-=(0.1*this.effectImmune)/this.effectReplayer*timeFix;
-      if(this.speed < 5){this.speed = 5;}
       if(this.statSpeed < 5){this.statSpeed = 5;}
     }
 
-    if(this.regenghost){
+    if(this.regenghost && this.regen - (0.04*this.effectImmune)/this.effectReplayer*timeFix >= 1){
+      if(!settings.no_points && (false || Number((parseFloat(this.regen.toFixed(1))%0.2).toFixed(1)) == 0.2) )this.points++
       this.regen-=(0.04*this.effectImmune)/this.effectReplayer*timeFix;
       if(this.regen < 1){this.regen = 1;}
     }
@@ -678,10 +735,10 @@ class Player {
       this.inBarrier = true;
     }
 
-    if((this.quicksand || this.quicksand === 0) && !(this.god||this.inBarrier||(this.invicible&&this.className=="Magmax"))){
-      this.pos.x += Math.cos(this.quicksand * (Math.PI/180)) * (5/32) * timeFix;
-      this.pos.y += Math.sin(this.quicksand * (Math.PI/180)) * (5/32) * timeFix;  
-      this.quicksand = false;
+    if((this.quicksand.angle || this.quicksand.angle === 0) && !(this.god||this.inBarrier||(this.invicible&&this.className=="Magmax"))){
+      this.pos.x += Math.cos(this.quicksand.angle * (Math.PI/180)) * (this.quicksand.strength/32) * timeFix;
+      this.pos.y += Math.sin(this.quicksand.angle * (Math.PI/180)) * (this.quicksand.strength/32) * timeFix;  
+      this.quicksand.angle = undefined;
     }
 
     if (this.charging) {
@@ -755,7 +812,7 @@ class Player {
     this.abs_d_x = Math.abs(this.d_x);
     this.abs_d_y = Math.abs(this.d_y);
 
-    if(this.className == "Cent"){
+    if(this.shouldCentMove()){
       if(this.abs_d_x > this.cent_max_distance && !this.slippery){
         this.d_x *= this.cent_max_distance / this.abs_d_x;
       }
@@ -770,6 +827,14 @@ class Player {
         this.d_y *= this.distance_movement / this.abs_d_y;
       }
     }
+
+    let prvLead = this.leadTime;
+    this.leadTime = Math.max(0,this.leadTime-time);
+    if (this.leadTime !== prvLead && this.leadTime === 0){
+      this.cent_input_ready = true;
+      this.cent_accelerating = false;
+      this.cent_is_moving = false;
+    }
     
     this.prevSlippery = this.slippery;
     if (this.abs_d_x<0.001) {
@@ -780,6 +845,11 @@ class Player {
     }
     this.distance_moved_previously = [this.d_x,this.d_y]
     this.vel = new Vector(this.d_x,this.d_y)
+
+    if (Math.atan2(this.vel.y,this.vel.x)!= 0 || this.moving) {
+      this.previousAngle = Math.atan2(this.vel.y,this.vel.x);
+    }
+
     this.slowing = false;
     this.freezing = false;
     this.web = false;
@@ -1085,7 +1155,7 @@ class Shade extends Player {
     super(pos, 3, speed, "#826565", "Shade");
     this.firstTime=0;
     this.secondTime=0;
-    this.hasAB = true; this.ab1L = 5; this.ab2L = 0; this.firstTotalCooldown = 7000; this.secondTotalCooldown = 1000;
+    this.hasAB = true; this.ab1L = 5; this.ab2L = 5; this.firstTotalCooldown = 7000; this.secondTotalCooldown = 1000;
   }
   abilities(time, area, offset) {
     if (this.firstAbility) {
@@ -1097,19 +1167,197 @@ class Shade extends Player {
         this.shadeNight = 7000;
       }
     }
-    if (this.secondAbility) {
-      this.secondAbilityActivated = !this.secondAbilityActivated;
-    }
     if(this.night){
       this.speedAdditioner+=5;
     }
-    if (this.secondAbilityActivated) {    }
     if(this.night && this.shadeNight > 0){
       this.shadeNight-=time;
     } else if(this.shadeNight <= 0 && this.night){
       this.night = false;
       this.speedAdditioner=0;
     } else {this.shadeNight = 0}
+
+    if (this.secondAbility && this.secondAbilityCooldown == 0 && this.energy >= 5) {
+      this.secondAbilityActivated = !this.secondAbilityActivated;
+      this.secondAbilityCooldown+=1000;
+      this.energy-=5;
+
+      area.addEntity(0, new shadeVengeance(new Vector(this.pos.x - offset.x, this.pos.y - offset.y),this.mouseActive ? this.mouse_angle : this.previousAngle, 1.3, 58, this.id))
+    }
+  }
+}
+
+class shadeVengeance extends Entity {
+  constructor(pos,angle,radius,speed,owner) {
+    super(pos, radius, "brown");
+    this.speed=speed;
+    this.owner = owner;
+    this.collide = true;
+    this.isEnemy = false;
+    this.acceleration = 2;
+    this.weak = false; //affects if destroyed outside of map bounds
+    this.toRemove = false;
+    this.no_collide = true; //(false - maybe makes a ball bounce off the walls inside area
+    this.isSpawned = false;
+    this.returning = false;
+    this.vel.x = Math.cos(angle+10e-8) * speed;
+    this.vel.y = Math.sin(angle+10e-8) * speed;
+    this.oldAngle = this.angle;
+    this.targetAngle = this.angle;
+    this.texture = "vengeance_projectile";
+    this.clock=0
+  }
+  compute_speed(){
+    if(this.returning && this.speed<70) {
+      this.speed += this.acceleration*(this.clock*(60/1000));
+    } else if(!this.returning) {
+      this.speed -= this.acceleration*(this.clock*(60/1000))
+      if ((this.speed - this.acceleration)<0) {
+        this.angle = Math.atan2(this.vel.y, this.vel.x);
+        this.speed==0
+        this.returning=true;
+        this.angle = this.angle + Math.PI;
+      }
+    }
+    this.angleToVel();
+    this.oldAngle = this.angle;
+  }
+  behavior(time, area, offset, players) {
+    this.clock=time
+    if (this.returning) {
+      let index;
+      for (var i in players) {
+          index = i;
+        }
+      this.velToAngle();
+      if (index != undefined) {
+        let dX = (players[index].pos.x - offset.x) - this.pos.x;
+        let dY = (players[index].pos.y - offset.y) - this.pos.y;
+        this.targetAngle = Math.atan2(dY, dX);
+        this.angle = this.targetAngle
+      }
+      this.angleToVel();
+    }
+    this.compute_speed();
+    for (let j in area.entities) {
+      for (let k in area.entities[j]) {
+        if ((area.entities[j][k].isEnemy||area.entities[j][k].weak)&&!area.entities[j][k].imune) {
+          if (distance(area.entities[j][k].pos, new Vector(this.pos.x, this.pos.y)) < this.radius+area.entities[j][k].radius) {
+            if(this.returning) {
+              area.entities[j][k].freeze = 6000;
+            } else if(!this.returning) {
+              area.entities[j][k].freeze = 0;
+              area.entities[j][k].slowdown_amount = 0.25;
+              area.entities[j][k].slowdown_time = 6000;
+            }
+          }
+        }
+      }
+    }
+  }
+  colide() {
+    let local_area = game.worlds[game.players[0].world].areas[game.players[0].area]
+    let local_boundary = local_area.getBoundary()
+    let local_assets = local_area.assets
+    for (let i in local_assets) {
+      if (local_assets[i].type==1) {
+        let rectHalfSizeX_1 = local_assets[i].size.x / 2;
+        let rectHalfSizeY_1 = local_assets[i].size.y / 2;
+        let rectCenterX_1 = local_assets[i].pos.x + rectHalfSizeX_1;
+        let rectCenterY_1 = local_assets[i].pos.y + rectHalfSizeY_1;
+        let distX_1 = Math.abs(this.pos.x - rectCenterX_1);
+        let distY_1 = Math.abs(this.pos.y - rectCenterY_1);
+        if ((distX_1 < rectHalfSizeX_1 + this.radius) && (distY_1 < rectHalfSizeY_1 + this.radius)) {
+          // Collision
+          let relX_1 = (this.pos.x - rectCenterX_1) / rectHalfSizeX_1;
+          let relY_1 = (this.pos.y - rectCenterY_1) / rectHalfSizeY_1;
+          if (Math.abs(relX_1) > Math.abs(relY_1)) {
+            // Horizontal collision.
+            if (relX_1 > 0) {
+              // Right collision
+              this.pos.x = rectCenterX_1 + rectHalfSizeX_1 + this.radius;
+              this.vel.x = Math.abs(this.vel.x);
+              this.velToAngle();
+              this.targetAngle = this.angle;
+            } else {
+              // Left collision
+              this.pos.x = rectCenterX_1 - rectHalfSizeX_1 - this.radius;
+              this.vel.x = -Math.abs(this.vel.x);
+              this.velToAngle();
+              this.targetAngle = this.angle;
+            }
+          } else {
+            // Vertical collision
+            if (relY_1 < 0) {
+              // Up collision
+              this.pos.y = rectCenterY_1 - rectHalfSizeY_1 - this.radius;
+              this.vel.y =-Math.abs(this.vel.y);
+              this.velToAngle();
+              this.targetAngle = this.angle;
+            } else {
+              // Bottom collision
+              this.pos.y = rectCenterY_1 + rectHalfSizeY_1 + this.radius;
+              this.vel.y = Math.abs(this.vel.y);
+              this.velToAngle();
+              this.targetAngle = this.angle;
+            }
+          }
+        }
+      }
+    }
+    if(this.returning) {
+      if (this.pos.x - this.radius < 0) {
+        this.pos.x = this.radius;
+        this.vel.x = Math.abs(this.vel.x);
+        this.velToAngle();
+        this.targetAngle = this.angle;
+      }
+      if (this.pos.x + this.radius > local_boundary.w) {
+        this.pos.x = local_boundary.w - this.radius;
+        this.vel.x = -Math.abs(this.vel.x);
+        this.velToAngle();
+        this.targetAngle = this.angle;
+      }
+      if (this.pos.y - this.radius < 0) {
+        this.pos.y = this.radius;
+        this.vel.y = Math.abs(this.vel.y);
+        this.velToAngle();
+        this.targetAngle = this.angle;
+      }
+      if (this.pos.y + this.radius > local_boundary.h) {
+        this.pos.y = local_boundary.h - this.radius;
+        this.vel.y = -Math.abs(this.vel.y);
+        this.velToAngle();
+        this.targetAngle = this.angle;
+      }
+    }
+    if (!this.returning) {
+      if (this.pos.x - this.radius < 0) {
+        this.pos.x = this.radius;
+        this.vel.x = Math.abs(this.vel.x);
+        this.velToAngle();
+      }
+      if (this.pos.x + this.radius > local_boundary.w) {
+        this.pos.x = local_boundary.w - this.radius;
+        this.vel.x = -Math.abs(this.vel.x);
+        this.velToAngle();
+      }
+      if (this.pos.y - this.radius < 0) {
+        this.pos.y = this.radius;
+        this.vel.y = Math.abs(this.vel.y);
+        this.velToAngle();
+      }
+      if (this.pos.y + this.radius > local_boundary.h) {
+        this.pos.y = local_boundary.h - this.radius;
+        this.vel.y = -Math.abs(this.vel.y);
+        this.velToAngle();
+      }
+    }
+  }
+  interact(player, worldPos) {
+    if (this.returning && distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < this.radius) {
+      this.toRemove = true;
+    }
   }
 }
 
@@ -1505,6 +1753,7 @@ class Brute extends Player {
     this.hasAB = true;
     this.ab1L = 5;
     this.ab2L = 5;
+    this.staticRadius = 18;
     this.fixedRadius = 18/32;
     this.firstTotalCooldown = 1000;
     this.secondTotalCooldown = 0;
@@ -1714,7 +1963,6 @@ class Candy extends Player {
     if(this.sugar_rush){
       this.aura = true;
       this.auraType = 0;
-      this.speedAdditioner = 5;
       for (var i in area.entities) {
         for (var j in area.entities[i]) {
           var entity = area.entities[i][j];
@@ -1895,7 +2143,6 @@ class Enemy extends Entity {
     this.stormAffectedRadiusMultiplier = 1;
   }
   update(time) {
-    if(this.color == "#7e7cd6"){if(time>averageFPS*2||isNaN(averageFPS)||!isActive){return}}
     this.radius = this.fixedRadius;
     if(this.color != "#7e7cd6"){
       this.velToAngle();
@@ -1929,6 +2176,15 @@ class Enemy extends Entity {
     this.radius *= this.radiusMultiplier;
     this.auraSize = this.auraStaticSize * this.radiusMultiplier;
     this.radiusMultiplier = 1;
+
+    if (this.slowdown_time>0) {
+      this.slowdown_time -= time;
+      this.speedMultiplier *= this.slowdown_amount;
+    }
+    if (this.slowdown_time<0) {
+      this.slowdown_time=0
+    }
+
     if(this.sugar_rush>0){
       this.speedMultiplier*=0.05;
       this.sugar_rush-=time;
@@ -2017,7 +2273,7 @@ class Wall extends Enemy {
     var anti_crash = 0;
     while (distance > 0){
       if(anti_crash>1000){
-        console.error("It sometimes crashes, but this is in evades code...");
+        console.error("It sometimes crashes, but this is in evades code... Check your wall enemies!");
         break;
       }
       anti_crash++;
@@ -2206,9 +2462,10 @@ class Slowing extends Enemy {
 }
 
 class Quicksand extends Enemy {
-  constructor(pos, radius, speed, angle, auraRadius = 150, push_direction) {
+  constructor(pos, radius, speed, angle, auraRadius = 150, push_direction, strength = 5) {
     super(pos, entityTypes.indexOf("quicksand") - 1, radius, speed, angle, "#6c541e", true, "rgba(108, 84, 30, 0.3)", auraRadius / 32);
     this.quicksand = push_direction;
+    this.quicksand_strength = strength;
     var player = game.players[0];
     if(!this.quicksand && this.quicksand !== 0){
       var world = game.worlds[player.world];
@@ -2216,13 +2473,13 @@ class Quicksand extends Enemy {
       if(area.entities['quicksand'] && area.entities['quicksand'].length>0){
         this.quicksand = area.entities['quicksand'][min_max(0,area.entities['quicksand'].length-1)].quicksand;  
       } else {
-        this.quicksand = random_between([0,90,180,270])
+        this.quicksand = random_between([0,90,180,270]);
       }
     }
   }
   auraEffect(player, worldPos) {
     if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.auraSize) {
-      player.quicksand = this.quicksand;
+      player.quicksand = {angle: this.quicksand, strength: this.quicksand_strength};
     }
   }
 }
@@ -2237,10 +2494,10 @@ class Defender extends Enemy {
       for (var j in area.entities[i]) {
         var entity = area.entities[i][j];
         if (distance(entity.pos, new Vector(this.pos.x, this.pos.y)) < entity.radius + this.auraSize) {
-          if (!area.entities[i][j].imune || area.entities[i][j].defended) {
-            area.entities[i][j].defended = true;
-            area.entities[i][j].curDefend = true;
-            area.entities[i][j].imune = true;
+          if (!entity.imune || entity.defended) {
+            entity.defended = true;
+            entity.curDefend = true;
+            entity.imune = true;
           }
         }
       }
@@ -2272,9 +2529,9 @@ class Oscillating extends Enemy {
   }
 }
 class Turning extends Enemy {
-  constructor(pos, radius, speed, angle, circle_size) {
+  constructor(pos, radius, speed, angle, circleSize = 150) {
     super(pos, entityTypes.indexOf("turning") - 1, radius, speed, angle, "#336600");
-    this.dir = speed / 150;
+    this.dir = speed / circleSize;
     this.turning = true;
     this.circle_size = circle_size;
   }
@@ -2289,9 +2546,10 @@ class Liquid extends Enemy {
     super(pos, entityTypes.indexOf("liquid") - 1, radius, speed, angle, "#6789ef");
   }
   behavior(time, area, offset, players) {
+    const activationDistance = 160;
     for (var i in players) {
-      if (distance(this.pos, new Vector(players[i].pos.x - offset.x, players[i].pos.y - offset.y)) < 160 / 32&&!players[i].night&&!players[i].god&&!players[i].safeZone&&!players[i].isDead) {
-        this.speedMultiplier = 5;
+      if (distance(this.pos, new Vector(players[i].pos.x - offset.x, players[i].pos.y - offset.y)) < activationDistance / 32&&!players[i].night&&!players[i].god&&!players[i].safeZone&&!players[i].isDead) {
+        this.speedMultiplier *= 5;
       }
     }
   }
@@ -2300,23 +2558,26 @@ class Sizing extends Enemy {
   constructor(pos, radius, speed, angle) {
     super(pos, entityTypes.indexOf("sizing") - 1, radius, speed, angle, "#f27743");
     this.growing = true;
-    this.maxRadius = this.radius * 2.5;
-    this.minRadius = this.radius / 2.5;
+    this.sizing_multiplier = 1;
+    this.sizing_bound_multiplier = 2.5;
+    this.sizing_lower_bound = this.sizing_multiplier / this.sizing_bound_multiplier;
+    this.sizing_upper_bound = this.sizing_multiplier * this.sizing_bound_multiplier;
+    this.sizing_changing_speed = 0.04;
   }
   behavior(time, area, offset, players) {
+    const timeFix = (time / (1000 / 30));
     if (this.growing) {
-      this.radius += ((time / (1000 / 30)) * 0.08) * this.minRadius;
-      this.fixedRadius = this.radius;
-      if (this.radius > this.maxRadius) {
+      this.sizing_multiplier += this.sizing_changing_speed * timeFix;
+      if (this.sizing_multiplier >= this.sizing_upper_bound) {
         this.growing = false;
       }
     } else {
-      this.radius -= ((time / 30) * 0.08) * this.minRadius;
-      this.fixedRadius = this.radius;
-      if (this.radius < this.minRadius) {
+      this.sizing_multiplier -= this.sizing_changing_speed * timeFix;
+      if (this.sizing_multiplier <= this.sizing_lower_bound) {
         this.growing = true;
       }
     }
+    this.radiusMultiplier = this.sizing_multiplier;
   }
 }
 class Switch extends Enemy {
@@ -2774,6 +3035,8 @@ class Ice extends Enemy {
   interact(player, worldPos) {
     if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.radius && !invulnerable(player)) {
         player.frozen = true;
+        player.frozenTimeLeft = 150*player.effectImmune/player.effectReplayer;
+        player.frozenTime = 0
     }
   }
 }
@@ -2786,7 +3049,7 @@ class PositiveMagneticGhost extends Enemy {
   }
   interact(player, worldPos) {
     if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.radius && !invulnerable(player)) {
-        player.magnetDirection = "Up"
+        player.magnetDirection = "Up";
     }
   }
 }
@@ -2799,7 +3062,7 @@ class NegativeMagneticGhost extends Enemy {
   }
   interact(player, worldPos) {
     if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.radius && !invulnerable(player)) {
-        player.magnetDirection = "Down"
+        player.magnetDirection = "Down";
     }
   }
 }
@@ -2906,7 +3169,8 @@ class Enlarging extends Enemy {
   }
   auraEffect(player, worldPos) {
     if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.auraSize) {
-      player.radiusAdditioner = (15+10/player.effectReplayer)/32;
+      const strength = 10 * player.effectImmune / player.effectReplayer;
+      player.radiusAdditioner = (player.staticRadius + strength) / 32;
     }
   }
 }
@@ -2916,7 +3180,9 @@ class Icicle extends Enemy {
     super(pos, entityTypes.indexOf("icicle") - 1, radius, speed, angle, "#adf8ff");
     this.clock = 0
     this.wallHit = false;
-    if (horizontal) {
+    if(angle !== undefined){
+      this.angle = angle;
+    } else if (horizontal) {
       this.vel.x = (Math.floor(Math.random() * 2) * 2 - 1) * speed;
       this.vel.y = 0
     } else {
@@ -3123,10 +3389,10 @@ class Zoning extends Enemy {
   }
 }
 class Radiating extends Enemy {
-  constructor(pos, radius, speed, angle) {
+  constructor(pos, radius, speed, angle, releaseInterval = 4000, releaseTime) {
     super(pos, entityTypes.indexOf("radiating_bullets") - 1, radius, speed, angle, "#d3134f");
-    this.releaseTime = 4000;
-    this.clock = Math.random() * this.releaseTime;
+    this.releaseTime = releaseInterval;
+    this.clock = releaseTime || Math.random() * this.releaseTime;
   }
   behavior(time, area, offset, players) {
     this.clock += time;
@@ -3189,7 +3455,6 @@ class FrostGiant extends Enemy {
     this.reset_parameters();
   }
   behavior(time, area, offset, players) {
-    if(time>averageFPS*2||isNaN(averageFPS)||!isActive){return}
     this.fps_stabilizer+=time;
     if(!this.rotation&&this.fps_stabilizer>=this.tick_time){
       this.generate_entities(area);
@@ -3351,7 +3616,6 @@ class frost_giant_ice_bullet extends Entity {
     this.alpha = 1;
   }
   behavior(time, area, offset, players) {
-    if(time>averageFPS*2||isNaN(averageFPS)||!isActive){return}
     this.clock += time;
     this.decayed = false;
     this.repelled = false;
@@ -3419,7 +3683,7 @@ class Tree extends Enemy {
   constructor(pos, radius, speed, angle) {
     super(pos, entityTypes.indexOf("tree") - 1, radius, speed, angle, "#4e2700");
     this.staticSpeed = speed+0;
-    this.releaseTime = 4000;
+    this.totalReleaseTime = 4000;
     this.clock = Math.random() * 3500;
     this.clock2 = Math.random() * 500;
     this.clock3 = 0;
@@ -3432,7 +3696,7 @@ class Tree extends Enemy {
     this.clock += time;
     this.clock2 += time;
     this.clock3 += time;
-    if (this.clock > this.releaseTime) {
+    if (this.clock > this.totalReleaseTime) {
       var count = Math.floor(Math.random()*6)+2
       for (var i = 0; i < count; i++) {
         area.addSniperBullet(10, this.pos, i * Math.PI / (count/2), 12 / 32, 6)
@@ -3517,6 +3781,7 @@ class Pumpkin extends Enemy {
     this.staticSpeed = speed + 0;
     this.isLight = false;
     this.lightCount = this.radius*32+30;
+    this.outline = true;
   }
   behavior(time,area,offset,players){
     if(this.texture=="pumpkinOff"){
@@ -3568,6 +3833,7 @@ class FakePumpkin extends Entity {
     this.texture = "pumpkinOff";
     this.Harmless = true;
     this.no_collide = true;
+    this.outline = true;
   }
 }
 
@@ -3600,9 +3866,10 @@ class RegenGhost extends Enemy {
 }
 
 class SpeedSniper extends Enemy {
-  constructor(pos, radius, speed, angle) {
+  constructor(pos, radius, speed, angle, speedLoss = 1) {
     super(pos, entityTypes.indexOf("speed_sniper") - 1, radius, speed, angle, "#ff9000");
     this.releaseTime = 2500;
+    this.speedLoss = speedLoss;
     this.clock = Math.random() * this.releaseTime;
   }
   behavior(time, area, offset, players) {
@@ -3620,7 +3887,7 @@ class SpeedSniper extends Enemy {
       if (index != undefined&&!players[0].night&&!players[0].god&&!players[0].isDead) {
         var dX = (players[index].pos.x - offset.x) - this.pos.x;
         var dY = (players[index].pos.y - offset.y) - this.pos.y;
-        area.addSniperBullet(3, this.pos, Math.atan2(dY, dX), 10 / 32, 16)
+        area.addSniperBullet(3, this.pos, Math.atan2(dY, dX), 10 / 32, 16, this.speedLoss)
         this.clock = 0;
       }
     }
@@ -3628,24 +3895,29 @@ class SpeedSniper extends Enemy {
 }
 
 class SpeedSniperBullet extends Entity {
-  constructor(pos, angle, radius, speed) {
+  constructor(pos, angle, radius, speed, speedLoss) {
     super(pos, radius, "#d6885c");
     this.vel.x = Math.cos(angle) * speed;
     this.vel.y = Math.sin(angle) * speed;
     this.weak = true;
     this.Harmless = true;
+    this.speedLoss = speedLoss;
   }
   interact(player, worldPos) {
     if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.radius && !invulnerable(player)) {
-      if(player.speed>5){player.speed-=(1*player.effectImmune)/player.effectReplayer; player.points+=2;}if(player.speed<5){player.speed = 5;}
+      if(player.speed>5){
+        player.speed-=(this.speedLoss*player.effectImmune)/player.effectReplayer;
+        if(!settings.no_points)player.points+=Math.round(this.speedLoss*2);
+      }if(player.speed<5){player.speed = 5;}
       this.toRemove = true;
     }
   }
 }
 class RegenSniper extends Enemy {
-  constructor(pos, radius, speed, angle) {
-    super(pos, entityTypes.indexOf("regen_Sniper") - 1, radius, speed, angle, "#00cc8e");
+  constructor(pos, radius, speed, angle, regenLoss = 0.4) {
+    super(pos, entityTypes.indexOf("regen_sniper") - 1, radius, speed, angle, "#00cc8e");
     this.releaseTime = 3000;
+    this.regenLoss = regenLoss;
     this.clock = Math.random() * this.releaseTime;
   }
   behavior(time, area, offset, players) {
@@ -3663,23 +3935,25 @@ class RegenSniper extends Enemy {
       if (index != undefined&&!players[0].night&&!players[0].god&&!players[0].isDead) {
         var dX = (players[index].pos.x - offset.x) - this.pos.x;
         var dY = (players[index].pos.y - offset.y) - this.pos.y;
-        area.addSniperBullet(4, this.pos, Math.atan2(dY, dX), 10 / 32, 16)
+        area.addSniperBullet(4, this.pos, Math.atan2(dY, dX), 10 / 32, 16, this.regenLoss)
         this.clock = 0;
       }
     }
   }
 }
 class RegenSniperBullet extends Entity {
-  constructor(pos, angle, radius, speed) {
+  constructor(pos, angle, radius, speed, regenLoss) {
     super(pos, radius, "#00a875");
     this.vel.x = Math.cos(angle) * speed;
     this.vel.y = Math.sin(angle) * speed;
     this.weak = true;
     this.Harmless = true;
+    this.regenLoss = regenLoss;
   }
   interact(player, worldPos) {
     if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.radius && !invulnerable(player)) {
-      player.regen-=(0.4*player.effectImmune)/player.effectReplayer; player.points+=2;
+      player.regen-=(this.regenLoss*player.effectImmune)/player.effectReplayer;
+      if(!settings.no_points)player.points+=Math.round(this.regenLoss*5);
       if(player.regen<1){player.regen = 1;}
       this.vel.x = Math.cos(0) * this.speed;
       this.vel.y = Math.sin(0) * this.speed;
@@ -4090,7 +4364,7 @@ class Poison_Ghost extends Enemy {
     if(distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.radius) {
       player.poison = true;
       player.poisonTime = 0;
-      player.poisonTimeLeft = 100*player.effectImmune/player.effectReplayer;
+      player.poisonTimeLeft = 150*player.effectImmune/player.effectReplayer;
     }
   }
 }
@@ -4225,8 +4499,7 @@ class Lunging extends Enemy {
         }
       }
       if (lunge_time_ratio > 0.75){
-        (random(1)) ? this.pos.y -= 2/32 * timeFix : this.pos.y += 2/32 * timeFix;
-        (random(1)) ? this.pos.x -= 2/32 * timeFix : this.pos.x += 2/32 * timeFix;
+        this.move(min_max(-2, 2) / 32, min_max(-2, 2) / 32, timeFix);
       }
     }
   }
@@ -4243,6 +4516,11 @@ class Lunging extends Enemy {
   change_angle(angle){
     this.angle = angle;
     this.compute_speed();
+  }
+
+  move (x, y, timeFix){
+    this.pos.x += x * timeFix;
+    this.pos.y += y * timeFix;
   }
 }
 
@@ -4492,6 +4770,58 @@ class Cactus extends Enemy {
   }
 }
 
+class LeadSniper extends Enemy {
+  constructor(pos, radius, speed, angle) {
+    super(pos, entityTypes.indexOf("lead_sniper") - 1, radius, speed, angle, "#788898");
+    this.releaseTime = 3000;
+    this.clock = Math.random() * this.releaseTime;
+  }
+  behavior(time, area, offset, players) {
+    this.clock += time;
+    if (this.clock > this.releaseTime) {
+      var min = 18.75;
+      var index;
+      var boundary = area.getActiveBoundary();
+      for (var i in players) {
+        if (distance(this.pos, new Vector(players[i].pos.x - offset.x, players[i].pos.y - offset.y)) < min && pointInRectangle(new Vector(players[i].pos.x - offset.x, players[i].pos.y - offset.y), new Vector(boundary.x, boundary.y), new Vector(boundary.w, boundary.h))) {
+          min = distance(this.pos, new Vector(players[i].pos.x - offset.x, players[i].pos.y - offset.y));
+          index = i;
+        }
+      }
+      if (index != undefined&&!players[0].night&&!players[0].god&&!players[0].isDead) {
+        var dX = (players[index].pos.x - offset.x) - this.pos.x;
+        var dY = (players[index].pos.y - offset.y) - this.pos.y;
+        area.addSniperBullet(21, this.pos, Math.atan2(dY, dX), this.radius / 2, 10)
+        this.clock = 0;
+      }
+    }
+  }
+}
+
+class LeadSniperBullet extends Entity {
+  constructor(pos, angle, radius, speed) {
+    super(pos, radius, "#788898");
+    this.vel.x = Math.cos(angle) * speed;
+    this.vel.y = Math.sin(angle) * speed;
+    this.clock = 0;
+    this.weak = true;
+  }
+  behavior(time, area, offset, players) {
+    this.clock += time;
+  }
+  interact(player, worldPos) {
+    if (distance(player.pos, new Vector(this.pos.x + worldPos.x, this.pos.y + worldPos.y)) < player.radius + this.radius && !invulnerable(player)) {
+      //lead effect goes here
+      if (player.leadTime <= 0){
+        player.cent_input_ready = true;
+        player.cent_accelerating = false;
+        player.cent_is_moving = false;
+      }
+      player.leadTime = 3500/player.effectReplayer
+      this.toRemove = true;
+    }
+  }
+}
 // custom
 
 class StickySniper extends Enemy {
