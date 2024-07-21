@@ -1364,21 +1364,35 @@ class shadeVengeance extends Entity {
 class Reaper extends Player {
   constructor(pos, speed) {
     super(pos, 3, speed, "#424a59", "Reaper");
-    this.firstTime=0;
-    this.secondTime=0;
+    this.firstTime = 0;
+    this.secondTime = 0;
     this.hasAB = true;
     this.ab1L = 0;
     this.ab2L = 5;
     this.firstTotalCooldown = 4000;
     this.secondTotalCooldown = 10000;
+    this.preDepartSpeed;
+    this.departClock = 0;
   }
   abilities(time, area, offset) {
-    if(this.reaperShade){this.speed = 11;}
+    if (this.reaperShade) {
+      this.departClock -= time;
+      if (this.departClock < 0){
+        this.reaperShade = false;
+        this.god = false;
+        this.speed = this.preDepartSpeed;
+      }
+    }
     if (this.secondAbility) {
       this.secondAbilityActivated = !this.secondAbilityActivated;
-      if(this.energy>=30&&this.secondAbilityCooldown==0){
-        this.energy-=30; this.secondAbilityCooldown+=10000; var oldSpeed = this.speed+0;
-        this.speed = 11; this.reaperShade=true; this.god = true; setTimeout(()=>{this.reaperShade=false;this.god=false;this.speed=oldSpeed},3500)
+      if (this.energy >= 30 && this.secondAbilityCooldown == 0) {
+        this.energy -= 30;
+        this.secondAbilityCooldown += 10000;
+        this.preDepartSpeed = this.speed;
+        this.speed = 11;
+        this.reaperShade = true;
+        this.god = true;
+        this.departClock = 3500;
       }
     }
   }
