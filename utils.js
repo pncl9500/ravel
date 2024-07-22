@@ -69,6 +69,7 @@ var entityTypes = [
   "regen_ghost",
   "speed_ghost",
   "lead_sniper",
+  "charging",
   // Not in evades
   "wind", //use wind_ghost instead
   "web",
